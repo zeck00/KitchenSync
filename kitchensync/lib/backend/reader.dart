@@ -1,4 +1,6 @@
 // reader.dart
+// ignore_for_file: void_checks
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:nfc_manager/nfc_manager.dart';
