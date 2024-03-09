@@ -1,5 +1,5 @@
 // reader.dart
-// ignore_for_file: void_checks
+// ignore_for_file: void_checks, unnecessary_null_comparison
 
 import 'dart:convert';
 import 'dart:io';
