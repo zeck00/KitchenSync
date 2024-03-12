@@ -1,9 +1,9 @@
 name: kitchensync
-description: "A new Flutter project."
+description: "KitchenSync App"
 
-publish_to: 'none' 
+publish_to: 'none'
 
-version: 1.0.0+1 
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -11,20 +11,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.2
   path_provider: ^2.1.2
   nfc_manager: ^3.3.0
-  mockito: ^5.4.4
+  google_fonts: 6.1.0
+  flutter_floating_bottom_bar: ^1.2.0
+  dot_navigation_bar: ^1.0.2
+  floating_navbar: ^2.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-
-  flutter_lints: ^2.0.0
-
+  flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
-
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/data/
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/Icon.png" 

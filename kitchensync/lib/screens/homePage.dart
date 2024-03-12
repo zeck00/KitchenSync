@@ -1,26 +1,11 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, unused_import
 
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'KitchenSync',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: HomeScreen(),
-    );
-  }
-}
+import 'package:kitchensync/screens/appBar.dart';
+import 'package:kitchensync/screens/customDeviceCard.dart';
+import 'package:kitchensync/styles/AppColors.dart';
+import 'package:kitchensync/styles/AppFonts.dart';
+import 'size_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,94 +16,130 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isDarkMode = false;
+  ThemeMode _themeMode = ThemeMode.system; // Default theme
+  void _toggleTheme() {
+    setState(() {
+      if (_themeMode == ThemeMode.light) {
+        _themeMode = ThemeMode.dark;
+      } else {
+        _themeMode = ThemeMode.light;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    initSizeConfig(context);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            // Replace with your assets
-            backgroundImage: AssetImage('assets/logo.png'),
-          ),
+      appBar: CustomAppBar(),
+      body: Padding(
+        padding: const EdgeInsets.only(
+          left: 25.0,
+          right: 25,
+          top: 5.0,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey, // Circle background color
-              // Replace with your assets
-              child: Icon(Icons.person, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Hi, Ziad',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Good Morning, Anything on your mind for breakfast ?',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Image.asset(
-                // Replace with your assets
-                'assets/kitchen.png',
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton(
-                  icon: Icon(
-                    isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                    color: Colors.yellow,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isDarkMode = !isDarkMode;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          // The rest of your widgets go here
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          // Action when pressed
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IconButton(icon: Icon(Icons.menu), onPressed: () {}),
-            IconButton(icon: Icon(Icons.search), onPressed: () {}),
-            // Other icons as well
+            Stack(children: [
+              Positioned(
+                top: propHeight(41),
+                child: Text(
+                    'Good Morning, Anything on your mind for breakfast ?',
+                    style: AppFonts.minittles),
+              ),
+              Row(
+                children: [
+                  Text(
+                    'Hi, ',
+                    style: AppFonts.welcomemsg2,
+                  ),
+                  Text(
+                    'Ziad',
+                    style: AppFonts.welcomemsg1,
+                  ),
+                ],
+              ),
+            ]),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/kitchenLight.png',
+                  width: propWidth(490),
+                  height: propHeight(490),
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: propHeight(20),
+                  right: propWidth(25),
+                  child: GestureDetector(
+                    child: Image.asset(
+                      'assets/images/Do not Disturb iOS.png',
+                      width: propHeight(35),
+                      height: propWidth(35),
+                    ),
+                    onTap: () {
+                      _toggleTheme;
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: propHeight(90),
+                  right: propWidth(75),
+                  child: GestureDetector(
+                      child: Image.asset(
+                    'assets/images/Items.png',
+                    width: propWidth(110),
+                    height: propHeight(105),
+                  )),
+                ),
+                Positioned(
+                  top: propHeight(135),
+                  left: propWidth(120),
+                  child: GestureDetector(
+                      child: Image.asset(
+                    'assets/images/Items 1.png',
+                    width: propWidth(125),
+                    height: propHeight(90),
+                  )),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: propHeight(15),
+            ),
+            SingleChildScrollView(
+              clipBehavior: Clip.none,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  CustomDeviceCard(
+                    title: 'Refrigerator - 1',
+                    itemCount: '41',
+                    imagePath: 'assets/images/Refg.png',
+                  ),
+                  SizedBox(width: propWidth(25)),
+                  CustomDeviceCard(
+                    title: 'Cabinet - 1',
+                    itemCount: '13',
+                    imagePath: 'assets/images/cabi.png',
+                  ),
+                  SizedBox(width: propWidth(25)),
+                  CustomDeviceCard(
+                    title: 'Refrigerator - 2',
+                    itemCount: '41',
+                    imagePath: 'assets/images/Refg1.png',
+                  ),
+                  SizedBox(width: propWidth(25)),
+                  CustomDeviceCard(
+                    title: 'Cabinet - 2',
+                    itemCount: '13',
+                    imagePath: 'assets/images/cabi1.png',
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
