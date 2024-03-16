@@ -1,7 +1,10 @@
+// ignore_for_file: prefer_const_constructors, use_super_parameters, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
-import 'package:kitchensync/styles/AppFonts.dart'; // Assuming this is where your text styles are defined
-// Import other necessary custom widgets and utilities as needed
+import 'package:kitchensync/styles/AppColors.dart';
+import 'package:kitchensync/styles/AppFonts.dart';
+import 'package:kitchensync/screens/size_config.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({Key? key}) : super(key: key);
@@ -12,52 +15,126 @@ class InventoryScreen extends StatefulWidget {
 
 class _InventoryScreenState extends State<InventoryScreen> {
   bool isDarkMode = false;
-  // Add any other state variables you might need
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
-    // Initialize SizeConfig if you use it for responsive sizing
+    initSizeConfig(context);
     return Scaffold(
       appBar: CustomAppBar(),
-      body: SingleChildScrollView(
+      body: PageView(
+        pageSnapping: true,
+        scrollBehavior: MaterialScrollBehavior(),
+        physics: BouncingScrollPhysics(),
+        allowImplicitScrolling: true,
+        controller: _pageController,
+        onPageChanged: (int page) {
+          setState(() {
+            _currentPage = page;
+          });
+        },
+        children: [
+          buildPage('Antartica 1.3 State 1', 'Antartica 1.3',
+              'assets/images/RefgOpen1.png'),
+          buildPage('SavvyStow 2.0 State 1', 'SavvyStow 2.0',
+              'assets/images/RefgOpen1.png'),
+          buildPage('Antartica 1.2 State 1', 'Antartica 1.2',
+              'assets/images/RefgOpen2.png'),
+          buildPage('WasteWizard 1.0 State 1', 'WasteWizard 1.0',
+              'assets/images/WasteWizard.png'),
+          // Add more pages as needed
+        ],
+      ),
+    );
+  }
+
+  Widget buildPage(String deviceState, String deviceName, String imagePath) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: propWidth(25),
+          right: propWidth(25),
+          top: propHeight(5),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 16), // Adjust as needed
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Ziad\'s Refrigerator',
-                style: AppFonts.subtitle1, // Replace with your actual style
-              ),
+            SizedBox(height: propHeight(10)), // Adjust as needed
+            Row(
+              children: [
+                Text(
+                  'Ziad\'s ',
+                  style: AppFonts.welcomemsg2,
+                ),
+                Text(
+                  deviceName,
+                  style: AppFonts.welcomemsg1,
+                ),
+                Expanded(child: Container()),
+                Image.asset(
+                  'assets/images/Synchronize.png',
+                  color: AppColors.dark,
+                  width: 35,
+                  height: 35,
+                ),
+              ],
             ),
-            SizedBox(height: 16), // Adjust as needed
-            Center(
-              child: Image.asset(
-                'assets/images/RefgOpen.png', // Replace with your image path
-                // Set your width and height accordingly
-              ),
+            SizedBox(height: propHeight(10)),
+            Image.asset(
+              imagePath,
+              width: propWidth(420),
+              height: propHeight(370),
             ),
-            SizedBox(height: 16), // Adjust as needed
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'What’s In Antarctica 1.3?',
-                style: AppFonts.subtitle, // Replace with your actual style
-              ),
+            // Stack(clipBehavior: Clip.none, children: [
+            //   Container(
+            //     width: propWidth(360),
+            //     height: propHeight(380),
+            //     decoration: BoxDecoration(
+            //         color: AppColors.greySub,
+            //         borderRadius: BorderRadius.circular(17)),
+            //   ),
+            //   Center(
+            //     child: Image.asset(
+            //       'assets/images/RefgOpen.png',
+            //       width: propWidth(370),
+            //       height: propHeight(400),
+            //     ),
+            //   ),
+            // ]),
+            SizedBox(height: propHeight(10)), // Adjust as needed
+            Row(
+              children: [
+                Text(
+                  'What\'s In ',
+                  style: AppFonts.subtitle,
+                ),
+                Text(
+                  '$deviceName?',
+                  style: AppFonts.subtitle1,
+                ),
+                Expanded(child: Container()),
+                Image.asset(
+                  'assets/images/Next.png',
+                  color: AppColors.dark,
+                  width: 35,
+                  height: 35,
+                ),
+              ],
             ),
-            SizedBox(height: 16), // Adjust as needed
-            Container(
-              height: 200, // Adjust based on your card height
+            SizedBox(height: propHeight(15)), // Adjust as needed
+            SizedBox(
+              height: 190,
               child: ListView.builder(
+                clipBehavior: Clip.none,
+                physics: BouncingScrollPhysics(),
+                addRepaintBoundaries: false,
                 scrollDirection: Axis.horizontal,
-                itemCount: 10, // Replace with the actual number of items
+                itemCount: 6, // Replace with the actual number of items
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
-                    padding:
-                        EdgeInsets.only(left: index == 0 ? 16 : 8, right: 8),
-                    child: _buildCard(
-                        context, index), // We will define this method next
+                    padding: EdgeInsets.only(left: 0, right: 10),
+                    child: _buildCard(context, index), //defined below
                   );
                 },
               ),
@@ -68,34 +145,151 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  Widget _buildCard(BuildContext context, int index) {
-    // Replace with your actual data model
+  Widget _buildCard(
+    BuildContext context,
+    int index,
+  ) {
     final item = {
       'title': 'Item $index',
-      'quantity': 'x${index + 1}',
-      'iconPath': 'assets/images/Milk.png', // Replace with your item icon path
+      'quantity': '2' '.0 KG',
+      'iconPath': 'assets/images/Milk.png', // Replace with item icon path
     };
 
-    return Container(
-      width: 160, // Adjust as needed
+    return SizedBox(
+      width: 135, // Adjust as needed
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        color: AppColors.primary,
         elevation: 4,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              item['iconPath']!,
-              width: 48, // Adjust as needed
-              height: 48, // Adjust as needed
-            ),
-            SizedBox(height: 8), // Adjust as needed
-            Text(item['title']!,
-                style: AppFonts.cardTitle), // Use your custom style
-            Text(item['quantity']!,
-                style: AppFonts.cardTitle), // Use your custom style
-          ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                item['iconPath']!,
+                width: propWidth(50),
+                height: propHeight(50),
+              ),
+              Text(item['title']!, style: AppFonts.cardTitle),
+              SizedBox(height: propHeight(10)),
+              Text(item['quantity']!, style: AppFonts.numbers),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+class DeviceStateScreen extends StatelessWidget {
+  final String deviceState;
+
+  const DeviceStateScreen({Key? key, required this.deviceState})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // This is a placeholder widget. Replace it with your actual widget that shows the device state
+    return Center(
+      child: Text(deviceState),
+    );
+  }
+}
+
+
+
+
+
+
+
+// body: Padding(
+//   padding: EdgeInsets.only(
+//     left: 25,
+//     right: 25,
+//     top: 5.0,
+//   ),
+//   child: Column(
+//     crossAxisAlignment: CrossAxisAlignment.center,
+//     children: [
+//       SizedBox(height: propHeight(10)), // Adjust as needed
+//       Row(
+//         children: [
+//           Text(
+//             'Ziad\'s ',
+//             style: AppFonts.welcomemsg2,
+//           ),
+//           Text(
+//             'Refrigerator',
+//             style: AppFonts.welcomemsg1,
+//           ),
+//           Expanded(child: Container()),
+//           Image.asset(
+//             'assets/images/Synchronize.png',
+//             color: AppColors.dark,
+//             width: 35,
+//             height: 35,
+//           ),
+//         ],
+//       ),
+//       SizedBox(height: propHeight(10)),
+//       Image.asset(
+//         'assets/images/RefgOpen1.png',
+//       ),
+//       // Stack(clipBehavior: Clip.none, children: [
+//       //   Container(
+//       //     width: propWidth(360),
+//       //     height: propHeight(380),
+//       //     decoration: BoxDecoration(
+//       //         color: AppColors.greySub,
+//       //         borderRadius: BorderRadius.circular(17)),
+//       //   ),
+//       //   Center(
+//       //     child: Image.asset(
+//       //       'assets/images/RefgOpen.png',
+//       //       width: propWidth(370),
+//       //       height: propHeight(400),
+//       //     ),
+//       //   ),
+//       // ]),
+//       SizedBox(height: 10), // Adjust as needed
+//       Row(
+//         children: [
+//           Text(
+//             'What\'s In ',
+//             style: AppFonts.subtitle,
+//           ),
+//           Text(
+//             'Antartica 1.3?',
+//             style: AppFonts.subtitle1,
+//           ),
+//           Expanded(child: Container()),
+//           Image.asset(
+//             'assets/images/Next.png',
+//             color: AppColors.dark,
+//             width: 35,
+//             height: 35,
+//           ),
+//         ],
+//       ),
+//       SizedBox(height: propHeight(15)), // Adjust as needed
+//       SizedBox(
+//         height: 190, // Adjust as needed
+//         child: ListView.builder(
+//           addRepaintBoundaries: false,
+//           scrollDirection: Axis.horizontal,
+//           itemCount: 6, // Replace with the actual number of items
+//           itemBuilder: (BuildContext context, int index) {
+//             return Padding(
+//               padding: EdgeInsets.only(left: 10, right: 10),
+//               child: _buildCard(context, index), //defined below
+//             );
+//           },
+//         ),
+//       ),
+//     ],
+//   ),
+// ),
+// );
+// }

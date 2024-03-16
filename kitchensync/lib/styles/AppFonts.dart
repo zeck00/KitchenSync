@@ -18,7 +18,7 @@ class AppFonts {
   );
 
   static final TextStyle cardTitle = GoogleFonts.cairo(
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: FontWeight.w300,
     color: AppColors.light,
   );

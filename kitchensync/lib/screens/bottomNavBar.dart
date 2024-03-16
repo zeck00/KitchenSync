@@ -2,6 +2,7 @@
 
 import 'package:floating_navbar/floating_navbar_item.dart';
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/donatePage.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/screens/inventoryPage.dart';
 import 'package:kitchensync/screens/size_config.dart';
@@ -20,6 +21,7 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _screens = [
     HomeScreen(),
     InventoryScreen(),
+    DonateScreen(),
     // Add other screens as needed
   ];
 
@@ -60,7 +62,7 @@ class _MainLayoutState extends State<MainLayout> {
                 icon: ImageIcon(AssetImage('assets/images/Hand.png')),
                 useImageIcon: true,
                 title: 'home',
-                page: HomeScreen(),
+                page: DonateScreen(),
               ),
               FloatingNavBarItem(
                 icon: ImageIcon(AssetImage('assets/images/Setting.png')),
