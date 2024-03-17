@@ -1,10 +1,13 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters, library_private_types_in_public_api
+// ignore_for_file: prefer_const_constructors, use_super_parameters, library_private_types_in_public_api, unused_field
+
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/screens/itemsPage.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({Key? key}) : super(key: key);
@@ -17,39 +20,77 @@ class _InventoryScreenState extends State<InventoryScreen> {
   bool isDarkMode = false;
   int _currentPage = 0;
   final PageController _pageController = PageController();
+  bool _isLoading = false; // Add a new state variable for loading state
+  void simulatePageUpdate() async {
+    setState(() {
+      _isLoading = true; // Show loading overlay
+    });
+
+    // Simulate network request or processing delay
+    await Future.delayed(Duration(milliseconds: 1500));
+
+    setState(() {
+      _isLoading = false; // Hide loading overlay
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     initSizeConfig(context);
     return Scaffold(
       appBar: CustomAppBar(),
-      body: PageView(
-        pageSnapping: true,
-        scrollBehavior: MaterialScrollBehavior(),
-        physics: BouncingScrollPhysics(),
-        allowImplicitScrolling: true,
-        controller: _pageController,
-        onPageChanged: (int page) {
-          setState(() {
-            _currentPage = page;
-          });
-        },
+      body: Stack(
         children: [
-          buildPage('Antartica 1.3 State 1', 'Antartica 1.3',
-              'assets/images/RefgOpen1.png'),
-          buildPage('SavvyStow 2.0 State 1', 'SavvyStow 2.0',
-              'assets/images/RefgOpen1.png'),
-          buildPage('Antartica 1.2 State 1', 'Antartica 1.2',
-              'assets/images/RefgOpen2.png'),
-          buildPage('WasteWizard 1.0 State 1', 'WasteWizard 1.0',
-              'assets/images/WasteWizard.png'),
-          // Add more pages as needed
+          PageView(
+            pageSnapping: true,
+            scrollBehavior: MaterialScrollBehavior(),
+            physics: BouncingScrollPhysics(),
+            allowImplicitScrolling: true,
+            controller: _pageController,
+            onPageChanged: (int page) {
+              setState(() {
+                _currentPage = page;
+              });
+            },
+            children: [
+              buildPage('Antartica 1.3 State 1', 'Antartica 1.3',
+                  'assets/images/RefgOpen1.png', '001'),
+              buildPage('SavvyStow 2.0 State 1', 'SavvyStow 2.0',
+                  'assets/images/RefgOpen1.png', '002'),
+              buildPage('Antartica 1.2 State 1', 'Antartica 1.2',
+                  'assets/images/RefgOpen2.png', '003'),
+              buildPage('WasteWizard 1.0 State 1', 'WasteWizard 1.0',
+                  'assets/images/WasteWizard.png', '004'),
+              // Add more pages as needed
+            ],
+          ),
+          if (_isLoading) // Conditionally display the loading overlay
+            Container(
+              decoration: BoxDecoration(
+                  // Semi-transparent overlay
+                  ),
+              // Semi-transparent overlay
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.dark,
+                    strokeWidth: 6,
+                    semanticsLabel: 'wait',
+                    semanticsValue: 'wait',
+                    strokeCap: StrokeCap.round,
+                    strokeAlign: 1,
+                  ), // Loading indicator
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget buildPage(String deviceState, String deviceName, String imagePath) {
+  Widget buildPage(String deviceState, String deviceName, String imagePath,
+      String deviceId) {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
@@ -72,11 +113,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   style: AppFonts.welcomemsg1,
                 ),
                 Expanded(child: Container()),
-                Image.asset(
-                  'assets/images/Synchronize.png',
-                  color: AppColors.dark,
-                  width: 35,
-                  height: 35,
+                GestureDetector(
+                  child: Image.asset(
+                    'assets/images/Synchronize.png',
+                    color: AppColors.dark,
+                    width: 35,
+                    height: 35,
+                  ),
+                  onTap: () {
+                    simulatePageUpdate(); // Trigger loading overlay and delay
+                  },
                 ),
               ],
             ),
@@ -86,22 +132,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
               width: propWidth(420),
               height: propHeight(370),
             ),
-            // Stack(clipBehavior: Clip.none, children: [
-            //   Container(
-            //     width: propWidth(360),
-            //     height: propHeight(380),
-            //     decoration: BoxDecoration(
-            //         color: AppColors.greySub,
-            //         borderRadius: BorderRadius.circular(17)),
-            //   ),
-            //   Center(
-            //     child: Image.asset(
-            //       'assets/images/RefgOpen.png',
-            //       width: propWidth(370),
-            //       height: propHeight(400),
-            //     ),
-            //   ),
-            // ]),
             SizedBox(height: propHeight(10)), // Adjust as needed
             Row(
               children: [
@@ -114,11 +144,23 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   style: AppFonts.subtitle1,
                 ),
                 Expanded(child: Container()),
-                Image.asset(
-                  'assets/images/Next.png',
-                  color: AppColors.dark,
-                  width: 35,
-                  height: 35,
+                GestureDetector(
+                  child: Image.asset(
+                    'assets/images/Next.png',
+                    color: AppColors.dark,
+                    width: 35,
+                    height: 35,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ItemsScreen(
+                            deviceId:
+                                deviceId), // Replace '001' with your actual device ID
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -182,23 +224,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 }
-
-class DeviceStateScreen extends StatelessWidget {
-  final String deviceState;
-
-  const DeviceStateScreen({Key? key, required this.deviceState})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // This is a placeholder widget. Replace it with your actual widget that shows the device state
-    return Center(
-      child: Text(deviceState),
-    );
-  }
-}
-
-
 
 
 

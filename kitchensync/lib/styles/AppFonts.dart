@@ -106,4 +106,10 @@ class AppFonts {
     fontWeight: FontWeight.w300,
     color: AppColors.greySub, // This will be added to AppColors
   );
+
+  static final TextStyle numbers1 = GoogleFonts.cairo(
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
+    color: AppColors.primary, // This will be added to AppColors
+  );
 }

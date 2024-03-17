@@ -1,5 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
+/// Builds a custom app bar widget that displays the app name, logo, and profile avatar.
+///
+/// The app bar shows the app name centered at the top, with the logo on the left
+/// and profile avatar on the right. The logo and avatar are clickable.
+///
+/// This is used as the main app bar throughout the app. It is a stateless widget
+/// that implements [PreferredSizeWidget] to define the app bar height.
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -58,6 +65,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  /// Overrides [Size.preferredSize] to set the AppBar height.
+  ///
+  /// The _PopupRoute class extends [PopupRoute] to customize the popup
+  /// for selecting a kitchen. It sets properties like barrier color,
+  /// dismissibility, etc. and builds the popup UI.
   @override
   Size get preferredSize => Size.fromHeight(propHeight(107.5));
 }
