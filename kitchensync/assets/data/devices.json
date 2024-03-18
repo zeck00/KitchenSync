@@ -1,0 +1,31 @@
+{
+  "kitchenID": "001",
+
+  "kitchenName": "Ziad's Kitchen",
+
+  "devices": [
+    {
+      "deviceID": "001",
+
+      "deviceName": "Refrigerator",
+
+      "categoriesFile": "device_001.json"
+    },
+
+    {
+      "deviceID": "002",
+
+      "deviceName": "Cabinet",
+
+      "categoriesFile": "device_002.json"
+    },
+
+    {
+      "deviceID": "003",
+
+      "deviceName": "Cabinet",
+
+      "categoriesFile": "device_003.json"
+    }
+  ]
+}

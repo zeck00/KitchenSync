@@ -1,0 +1,12 @@
+[
+    {
+      "kitchenID": "001",
+      "kitchenName": "Ziad's Kitchen",
+      "devicesFile": "kitchen_001.json"
+    },
+    {
+      "kitchenID": "002",
+      "kitchenName": "Rama's Kitchen",
+      "devicesFile": "kitchen_002.json"
+    }
+  ]
