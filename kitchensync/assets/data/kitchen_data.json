@@ -1,0 +1,24 @@
+{
+    "devices": [
+      {
+        "deviceState": "Antartica 1.3 State 1",
+        "deviceName": "Antartica 1.3",
+        "imagePath": "assets/images/RefgOpen1.png"
+      },
+      {
+        "deviceState": "SavvyStow 2.0 State 1",
+        "deviceName": "SavvyStow 2.0",
+        "imagePath": "assets/images/RefgOpen1.png"
+      },
+      {
+        "deviceState": "Antartica 1.2 State 1",
+        "deviceName": "Antartica 1.2",
+        "imagePath": "assets/images/RefgOpen2.png"
+      },
+      {
+        "deviceState": "WasteWizard 1.0 State 1",
+        "deviceName": "WasteWizard 1.0",
+        "imagePath": "assets/images/WasteWizard.png"
+      }
+    ]
+  }
