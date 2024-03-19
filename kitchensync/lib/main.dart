@@ -30,13 +30,12 @@ class MyApp extends StatelessWidget {
     );
 
     return MaterialApp(
-      themeMode: ThemeMode.system, // Use system theme mode by default
+      themeMode: ThemeMode.light, // Use system theme mode by default
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: lightColorScheme,
         useMaterial3: false, // Or true if you want to use Material 3
-        // Define other light theme settings if necessary
       ),
       darkTheme: ThemeData(
         colorScheme: darkColorScheme,

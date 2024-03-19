@@ -18,7 +18,7 @@ class CustomListItem extends StatelessWidget {
       required this.numberTxt,
       required this.subTxt,
       required this.imagePath,
-      required this.width,
+      this.width = double.infinity,
       required this.height});
 
   @override

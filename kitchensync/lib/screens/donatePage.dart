@@ -1,8 +1,12 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
+import 'dart:ui' as ui;
 
 class DonateScreen extends StatelessWidget {
   @override
@@ -19,13 +23,18 @@ class DonateScreen extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: propHeight(20)),
-            Text(
-              "Let's Donate",
-              style: TextStyle(
-                fontSize: propWidth(24), // Adjust the font size as needed
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
+            Row(
+              children: [
+                Text(
+                  'Let\'s ',
+                  style: AppFonts.welcomemsg2,
+                ),
+                Text(
+                  'Donate',
+                  style: AppFonts.welcomemsg1,
+                ),
+                Expanded(child: Container()),
+              ],
             ),
             Image.asset(
               'assets/images/kitchenMain.png',
@@ -33,16 +42,34 @@ class DonateScreen extends StatelessWidget {
                   FilterQuality.high, // Replace with the actual image path
             ),
             SizedBox(height: propHeight(20)),
-            Text(
-              'Nearest Food Banks',
-              style: AppFonts.subtitle, // Style as per your AppFonts
+            Row(
+              children: [
+                Text(
+                  'Nearest Food Banks',
+                  style: AppFonts.servicename,
+                ),
+                Expanded(child: Container()),
+                GestureDetector(
+                  child: Image.asset(
+                    'assets/images/Next.png',
+                    color: AppColors.greySub,
+                    width: 35,
+                    height: 35,
+                  ),
+                  onTap: () {},
+                ),
+              ],
             ),
             // This can be a horizontal list view or just a row of widgets
             _buildNearestFoodBanks(),
             SizedBox(height: propHeight(20)),
-            Text(
-              'Schedule a Donation',
-              style: AppFonts.subtitle, // Style as per your AppFonts
+            Row(
+              children: [
+                Text(
+                  'Schedule a Donation',
+                  style: AppFonts.servicename,
+                ),
+              ],
             ),
             // This would typically be a list of donation times
             _buildDonationSchedule(),
@@ -56,13 +83,20 @@ class DonateScreen extends StatelessWidget {
     // Mock data, please replace with actual data
     var nearestFoodBanks = [
       {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
+      {'name': 'Ziad Food Bank', 'location': 'Dubai, UAE'},
+      {'name': 'Ziad Food Bank', 'location': 'Dubai, UAE'},
+      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
+      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
+      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
       // Add more banks as needed
     ];
 
     return Container(
-      height: propHeight(100), // Adjust as needed
+      height: propHeight(55),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        physics: BouncingScrollPhysics(),
         itemCount: nearestFoodBanks.length,
         itemBuilder: (BuildContext context, int index) {
           return _buildFoodBankCard(nearestFoodBanks[index]);
@@ -72,42 +106,191 @@ class DonateScreen extends StatelessWidget {
   }
 
   Widget _buildFoodBankCard(Map<String, String> foodBank) {
-    return Card(
-      // Style the card as needed
-      child: Padding(
-        padding: EdgeInsets.all(propWidth(8)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(foodBank['name']!, style: AppFonts.cardTitle),
-            Text(foodBank['location']!, style: AppFonts.servicename),
-            // You can add an icon or image here
-          ],
+    return Row(
+      children: [
+        Container(
+          width: propWidth(165),
+          height: propHeight(55),
+          padding: EdgeInsets.only(left: propWidth(10), right: propWidth(10)),
+          decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(propWidth(17))),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset('assets/images/Nav.png',
+                  width: propWidth(25), height: propHeight(25)),
+              SizedBox(width: propWidth(5)), // Space between icon and text
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(foodBank['name']!, style: AppFonts.locCard),
+                  Text(foodBank['location']!, style: AppFonts.locSub),
+                ],
+              )
+            ],
+          ),
         ),
-      ),
+        SizedBox(width: propWidth(10))
+      ],
     );
   }
 
   Widget _buildDonationSchedule() {
     // Mock data, please replace with actual data
     var donationSchedule = [
-      {'date': '20th Mar, 2024', 'items': '7 Donables'},
+      {'date': '20th Mar, 2024', 'items': '7'},
+      {'date': '20th Mar, 2024', 'items': '7'},
+      {'date': '20th Mar, 2024', 'items': '7'},
+      {'date': '20th Mar, 2024', 'items': '7'},
+      {'date': '20th Mar, 2024', 'items': '7'},
+
       // Add more schedules as needed
     ];
 
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: donationSchedule.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title:
-              Text(donationSchedule[index]['date']!, style: AppFonts.cardTitle),
-          subtitle: Text(donationSchedule[index]['items']!,
-              style: AppFonts.cardTitle),
-          trailing: Icon(Icons.navigate_next), // Adjust icon as needed
-        );
-      },
+    return SizedBox(
+      width: double.infinity,
+      height: propHeight(280),
+      child: SingleChildScrollView(
+        child: ListView.builder(
+          physics: BouncingScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: donationSchedule.length,
+          padding: EdgeInsets.all(0),
+          itemBuilder: (BuildContext context, int index) {
+            return DonationTile(
+              date: donationSchedule[index]['date']!,
+              itemsCount: donationSchedule[index]['items']!,
+              onTap: () {
+                // Handle the tap event
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class DonationTile extends StatelessWidget {
+  final String date;
+  final String itemsCount;
+  final VoidCallback onTap;
+
+  const DonationTile({
+    Key? key,
+    required this.date,
+    required this.itemsCount,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    initSizeConfig(context); // Initialize size configuration
+    void _showPopup(BuildContext context) {
+      Navigator.of(context).push(_PopupRoute());
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: propWidth(380),
+            height: propHeight(60),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: propWidth(15),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: AppFonts.cardTitle,
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        itemsCount,
+                        style: AppFonts.cntrstText1,
+                      ),
+                      Text(
+                        ' Donables',
+                        style: AppFonts.cntrstText2,
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => _showPopup(context),
+                    child: Image.asset('assets/images/Schedule.png',
+                        width: propWidth(26), height: propHeight(26)),
+                  )
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: propHeight(10),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _PopupRoute extends PopupRoute {
+  @override
+  Color get barrierColor => AppColors.greySub.withOpacity(0.2);
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String get barrierLabel => 'Select Kitchen';
+
+  @override
+  Duration get transitionDuration => Duration(milliseconds: 250);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return BackdropFilter(
+      filter: ui.ImageFilter.blur(
+        sigmaX: 12.0,
+        sigmaY: 12.0,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Center(
+          child: ClipRect(
+            child: Padding(
+              padding: const EdgeInsets.all(25),
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  Center(
+                      child: Text(
+                    "Choose Your Kitchen",
+                    style: AppFonts.choose1,
+                  )),
+                  SizedBox(height: propHeight(25)),
+                  CustomListItem(
+                      mainTxt: 'mainTxt',
+                      numberTxt: 'numberTxt',
+                      subTxt: 'subTxt',
+                      imagePath: 'assets/images/Egg.png',
+                      height: 100)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

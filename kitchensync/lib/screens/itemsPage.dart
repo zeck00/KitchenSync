@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/customListItem.dart';
+import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/size_config.dart';
@@ -165,12 +166,19 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               ),
               Spacer(), // Use Spacer for automatically calculated remaining space
               GestureDetector(
-                child: Image.asset(
-                  'assets/images/CookBook.png',
-                  width: propWidth(30),
-                  height: propHeight(30),
-                ),
-              ),
+                  child: Image.asset(
+                    'assets/images/CookBook.png',
+                    width: propWidth(30),
+                    height: propHeight(30),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              HomeScreen()), // Replace HomeScreen() with the recpies generation page
+                    );
+                  }),
             ],
           ),
           trailing: Image.asset(
