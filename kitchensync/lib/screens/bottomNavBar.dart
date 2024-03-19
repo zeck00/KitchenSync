@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/donatePage.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/screens/inventoryPage.dart';
+import 'package:kitchensync/screens/settingsPage.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:floating_navbar/floating_navbar.dart';
@@ -22,6 +23,7 @@ class _MainLayoutState extends State<MainLayout> {
     HomeScreen(),
     InventoryScreen(),
     DonateScreen(),
+    SettingsScreen(),
     // Add other screens as needed
   ];
 

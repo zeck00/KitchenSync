@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/customListItem.dart';
@@ -36,10 +36,33 @@ class DonateScreen extends StatelessWidget {
                 Expanded(child: Container()),
               ],
             ),
-            Image.asset(
-              'assets/images/kitchenMain.png',
-              filterQuality:
-                  FilterQuality.high, // Replace with the actual image path
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/kitchenMain1.png',
+                ),
+                Positioned(
+                  bottom: propHeight(80),
+                  right: propWidth(75),
+                  child: GestureDetector(
+                      child: Image.asset(
+                    'assets/images/Items.png',
+                    width: propWidth(110),
+                    height: propHeight(105),
+                  )),
+                ),
+                Positioned(
+                  top: propHeight(40),
+                  left: propWidth(80),
+                  child: GestureDetector(
+                      child: Image.asset(
+                    'assets/images/Items 1.png',
+                    width: propWidth(125),
+                    height: propHeight(90),
+                  )),
+                ),
+              ],
             ),
             SizedBox(height: propHeight(20)),
             Row(
@@ -48,19 +71,13 @@ class DonateScreen extends StatelessWidget {
                   'Nearest Food Banks',
                   style: AppFonts.servicename,
                 ),
-                Expanded(child: Container()),
-                GestureDetector(
-                  child: Image.asset(
-                    'assets/images/Next.png',
-                    color: AppColors.greySub,
-                    width: 35,
-                    height: 35,
-                  ),
-                  onTap: () {},
-                ),
               ],
             ),
-            // This can be a horizontal list view or just a row of widgets
+
+            SizedBox(
+              height: propHeight(6),
+            ),
+            // This would typically be a list of nearest food banks
             _buildNearestFoodBanks(),
             SizedBox(height: propHeight(20)),
             Row(
@@ -95,7 +112,7 @@ class DonateScreen extends StatelessWidget {
       height: propHeight(55),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
+        clipBehavior: Clip.hardEdge,
         physics: BouncingScrollPhysics(),
         itemCount: nearestFoodBanks.length,
         itemBuilder: (BuildContext context, int index) {
@@ -122,6 +139,7 @@ class DonateScreen extends StatelessWidget {
                   width: propWidth(25), height: propHeight(25)),
               SizedBox(width: propWidth(5)), // Space between icon and text
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(foodBank['name']!, style: AppFonts.locCard),
@@ -139,11 +157,11 @@ class DonateScreen extends StatelessWidget {
   Widget _buildDonationSchedule() {
     // Mock data, please replace with actual data
     var donationSchedule = [
+      {'date': '20th Mar, 2024', 'items': '5'},
       {'date': '20th Mar, 2024', 'items': '7'},
-      {'date': '20th Mar, 2024', 'items': '7'},
-      {'date': '20th Mar, 2024', 'items': '7'},
-      {'date': '20th Mar, 2024', 'items': '7'},
-      {'date': '20th Mar, 2024', 'items': '7'},
+      {'date': '20th Mar, 2024', 'items': '3'},
+      {'date': '20th Mar, 2024', 'items': '2'},
+      {'date': '20th Mar, 2024', 'items': '1'},
 
       // Add more schedules as needed
     ];
@@ -156,7 +174,6 @@ class DonateScreen extends StatelessWidget {
           physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           itemCount: donationSchedule.length,
-          padding: EdgeInsets.all(0),
           itemBuilder: (BuildContext context, int index) {
             return DonationTile(
               date: donationSchedule[index]['date']!,
@@ -192,7 +209,7 @@ class DonationTile extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _showPopup(context),
       child: Column(
         children: [
           Container(
@@ -225,11 +242,8 @@ class DonationTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () => _showPopup(context),
-                    child: Image.asset('assets/images/Schedule.png',
-                        width: propWidth(26), height: propHeight(26)),
-                  )
+                  Image.asset('assets/images/Schedule.png',
+                      width: propWidth(26), height: propHeight(26))
                 ],
               ),
             ),
