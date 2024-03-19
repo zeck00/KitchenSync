@@ -70,7 +70,7 @@ class _MainLayoutState extends State<MainLayout> {
                 icon: ImageIcon(AssetImage('assets/images/Setting.png')),
                 useImageIcon: true,
                 title: 'home',
-                page: HomeScreen(),
+                page: SettingsScreen(),
               ),
             ],
             horizontalPadding: 15,
