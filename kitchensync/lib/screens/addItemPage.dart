@@ -1,8 +1,11 @@
-// ignore_for_file: prefer_final_fields, unused_import, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/backend/dataret.dart';
+import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/AppColors.dart';
+import 'package:kitchensync/styles/AppFonts.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -13,9 +16,9 @@ class AddItemPage extends StatefulWidget {
 
 class _AddItemPageState extends State<AddItemPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late List<Kitchen> kitchens;
-  late List<Device> devices;
-  late List<Category> categories;
+  late List<Kitchen> kitchens = [];
+  late List<Device> devices = [];
+  late List<Category> categories = [];
   String? selectedKitchen;
   String? selectedDevice;
   String? selectedCategory;
@@ -32,19 +35,8 @@ class _AddItemPageState extends State<AddItemPage> {
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _unitController = TextEditingController();
 
-  Future<void> loadCategoriesForDevice(String deviceId) async {
-    var device = devices.firstWhere((device) => device.deviceID == deviceId);
-    await device.loadCategories('assets/data/${device.categoriesFile}');
-    setState(() {
-      categories = device.categories;
-      selectedCategory =
-          categories.isNotEmpty ? categories.first.categoryID : null;
-    });
-  }
-
   String generateItemId() {
     // Using DateTime to generate a unique ID for simplicity.
-    // In a production scenario, consider a more robust method for ID generation.
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
@@ -123,41 +115,98 @@ class _AddItemPageState extends State<AddItemPage> {
     fetchInitialData();
   }
 
-  fetchInitialData() async {
-    kitchens = await Kitchen.fetchKitchens('assets/data/kitchens.json');
-    // Assuming the first kitchen is the default
-    selectedKitchen = kitchens.first.kitchenID;
-    await kitchens.first.loadDevices();
-    devices = kitchens.first.devices;
-    selectedDevice = devices.first.deviceID;
-    await devices.first
-        .loadCategories('assets/data/${devices.first.categoriesFile}');
-    categories = devices.first.categories;
-    selectedCategory = categories.first.categoryID;
+  Future<void> fetchInitialData() async {
+    try {
+      kitchens = await Kitchen.fetchKitchens('assets/data/kitchens.json');
+      if (kitchens.isNotEmpty) {
+        // Select the first kitchen by default
+        selectedKitchen = kitchens.first.kitchenID;
+        await loadDevicesForKitchen(selectedKitchen!);
+      }
+    } catch (e) {
+      // Handle errors, perhaps log them or show a message to the user
+      print('Error loading initial data: $e');
+    }
+  }
 
-    // Once data is fetched, refresh the state to update the UI
-    setState(() {});
+  Future<void> loadDevicesForKitchen(String kitchenId) async {
+    var kitchen = kitchens.firstWhere((k) => k.kitchenID == kitchenId);
+    if (kitchen != null) {
+      devices = await kitchen.loadDevices();
+      if (devices.isNotEmpty) {
+        // Select the first device by default
+        selectedDevice = devices.first.deviceID;
+        await loadCategoriesForDevice(selectedDevice!);
+      }
+    }
+  }
+
+  Future<void> loadCategoriesForDevice(String deviceId) async {
+    var device = devices.firstWhere((d) => d.deviceID == deviceId);
+    if (device != null) {
+      categories =
+          await device.loadCategories('assets/data/${device.categoriesFile}');
+      if (categories.isNotEmpty) {
+        // Select the first category by default
+        selectedCategory = categories.first.categoryID;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     initSizeConfig(context); // Make sure to call this before using SizeConfig
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Item'),
-      ),
+      appBar: CustomAppBar(),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.all(8.0),
           child: Form(
             key: _formKey,
             child: Column(
               children: <Widget>[
-                buildKitchenDropdown(),
-                buildDeviceDropdown(),
-                buildCategoryDropdown(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(width: propWidth(10)),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Image.asset(
+                        'assets/images/Prvs.png',
+                        width: propWidth(30),
+                        height: propHeight(30),
+                      ),
+                    ),
+                    Expanded(child: Container()),
+                    Text(
+                      'Add Item',
+                      style: AppFonts.appname,
+                    ),
+                    Expanded(child: Container()),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          createItem();
+                          // Call the function to save the new item
+                        }
+                      },
+                      child: Text('ADD'),
+                    ),
+                    SizedBox(width: propWidth(10)),
+                  ],
+                ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Item Name'),
+                  decoration: InputDecoration(
+                    labelText: 'Item Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.itemName = newValue ?? '';
                   },
@@ -168,65 +217,126 @@ class _AddItemPageState extends State<AddItemPage> {
                     return null;
                   },
                 ),
+                SizedBox(height: propHeight(10)),
+                buildCategoryDropdown(),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'NFC Tag ID'),
+                  decoration: InputDecoration(
+                    labelText: 'NFC Tag ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.nfcTagID = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Purchase Date'),
+                  decoration: InputDecoration(
+                    labelText: 'Purchase Date',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.pDate = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Expiration Date'),
+                  decoration: InputDecoration(
+                    labelText: 'Expiration Date',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.xDate = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Insertion Date'),
+                  decoration: InputDecoration(
+                    labelText: 'Insertion Date',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.inDate = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Item Info'),
+                  decoration: InputDecoration(
+                    labelText: 'Item Info',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.itemInfo = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Status'),
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.status = newValue ?? '';
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Quantity'),
+                  decoration: InputDecoration(
+                    labelText: 'Quantity',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   keyboardType: TextInputType.number,
                   onSaved: (newValue) {
                     newItem?.quantity = int.tryParse(newValue ?? '0') ?? 0;
                   },
                 ),
+                SizedBox(height: propHeight(10)),
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Unit'),
+                  decoration: InputDecoration(
+                    labelText: 'Unit',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
                   onSaved: (newValue) {
                     newItem?.unit = newValue ?? '';
                   },
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      createItem();
-                      // Call the function to save the new item
-                    }
-                  },
-                  child: Text('Add Item'),
-                )
+                SizedBox(height: propHeight(10)),
+                buildKitchenDropdown(),
+                SizedBox(height: propHeight(10)),
+                buildDeviceDropdown(),
+                SizedBox(height: propHeight(10)),
               ],
             ),
           ),
@@ -252,7 +362,17 @@ class _AddItemPageState extends State<AddItemPage> {
           child: Text(kitchen.kitchenName),
         );
       }).toList(),
-      decoration: InputDecoration(labelText: 'Select Kitchen'),
+      decoration: InputDecoration(
+        labelText: 'Select Kitchen',
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: propWidth(20), vertical: propHeight(15)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(propHeight(17)),
+          borderSide: BorderSide(color: AppColors.primary),
+        ),
+        filled: true,
+        fillColor: AppColors.light,
+      ),
     );
   }
 
@@ -288,7 +408,17 @@ class _AddItemPageState extends State<AddItemPage> {
           child: Text(device.deviceName),
         );
       }).toList(),
-      decoration: InputDecoration(labelText: 'Select Device'),
+      decoration: InputDecoration(
+        labelText: 'Select Device',
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: propWidth(20), vertical: propHeight(15)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(propHeight(17)),
+          borderSide: BorderSide(color: AppColors.primary),
+        ),
+        filled: true,
+        fillColor: AppColors.light,
+      ),
     );
   }
 
@@ -308,7 +438,17 @@ class _AddItemPageState extends State<AddItemPage> {
           child: Text(category.categoryName),
         );
       }).toList(),
-      decoration: InputDecoration(labelText: 'Select Category'),
+      decoration: InputDecoration(
+        labelText: 'Select Category',
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: propWidth(20), vertical: propHeight(15)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(propHeight(17)),
+          borderSide: BorderSide(color: AppColors.primary),
+        ),
+        filled: true,
+        fillColor: AppColors.light,
+      ),
     );
   }
 }

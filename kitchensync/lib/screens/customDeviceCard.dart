@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
@@ -10,12 +12,12 @@ class CustomDeviceCard extends StatelessWidget {
   final Color containerColor;
 
   const CustomDeviceCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.itemCount,
     required this.imagePath,
     this.containerColor = AppColors.primary,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

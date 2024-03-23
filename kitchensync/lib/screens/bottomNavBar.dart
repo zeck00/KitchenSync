@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, prefer_final_fields, file_names
 
 import 'package:floating_navbar/floating_navbar_item.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +11,8 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:floating_navbar/floating_navbar.dart';
 
 class MainLayout extends StatefulWidget {
+  const MainLayout({super.key});
+
   @override
   _MainLayoutState createState() => _MainLayoutState();
 }

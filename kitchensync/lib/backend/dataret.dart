@@ -40,11 +40,12 @@ class Kitchen {
     );
   }
 
-  Future<void> loadDevices() async {
+  Future<List<Device>> loadDevices() async {
     final devicesJson = await loadJsonFromAssets('assets/data/$devicesPath');
     devices = (devicesJson['devices'] as List)
         .map((deviceJson) => Device.fromJson(deviceJson))
         .toList();
+    return devices;
   }
 }
 
@@ -76,12 +77,15 @@ class Device {
 
   List<Category> categories = [];
 
-  Future<void> loadCategories(String categoriesFilePath) async {
+  Future<List<Category>> loadCategories(String categoriesFilePath) async {
     final categoriesJson = await loadJsonFromAssets(categoriesFilePath);
-    // Assuming the JSON structure matches the given example.
-    categories = (categoriesJson as List)
+    // Here, categoriesJson is expected to be a Map, not a List directly.
+    // So, we first access the 'categories' key to get the List.
+    List<dynamic> categoriesList = categoriesJson['categories'];
+    categories = categoriesList
         .map((categoryData) => Category.fromJson(categoryData))
         .toList();
+    return categories;
   }
 }
 
@@ -147,7 +151,7 @@ class Item {
   Item({
     required this.itemID,
     required this.itemName,
-    required this.nfcTagID,
+    this.nfcTagID,
     required this.pDate,
     required this.xDate,
     required this.inDate,
@@ -160,7 +164,7 @@ class Item {
 
   String itemID;
   String itemName;
-  String nfcTagID;
+  String? nfcTagID;
   String pDate;
   String xDate;
   String inDate;

@@ -7,24 +7,24 @@
     {
       "deviceID": "001",
       "deviceName": "Refrigerator",
-      "categoriesFile": "device_001.json"
+      "categoriesFile": "categories.json"
     },
 
     {
       "deviceID": "002",
       "deviceName": "Cabinet",
-      "categoriesFile": "device_002.json"
+      "categoriesFile": "categories_002.json"
     },
 
     {
       "deviceID": "003",
       "deviceName": "Cabinet",
-      "categoriesFile": "device_003.json"
+      "categoriesFile": "categories.json"
     },
     {
       "deviceID": "004",
       "deviceName": "Smart bin",
-      "categoriesFile": "device_004.json"
+      "categoriesFile": "categories.json"
     }
   ]
 }

@@ -1,6 +1,7 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field, unused_element
 
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/addItemPage.dart';
 import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -83,13 +84,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 ),
                 Expanded(child: Container()),
                 GestureDetector(
-                  onTap: () => _showPopup(context),
-                  child: Image.asset(
-                    'assets/images/Filter.png',
-                    width: propWidth(30),
-                    height: propHeight(30),
-                  ),
-                ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AddItemPage()),
+                      );
+                    },
+                    child: Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: AppColors.dark,
+                      size: propWidth(30),
+                    )),
               ],
             ),
 

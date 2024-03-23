@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters, file_names, no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/customListItem.dart';
@@ -9,6 +9,8 @@ import 'package:kitchensync/screens/size_config.dart';
 import 'dart:ui' as ui;
 
 class DonateScreen extends StatelessWidget {
+  const DonateScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     initSizeConfig(context);
@@ -108,7 +110,7 @@ class DonateScreen extends StatelessWidget {
       // Add more banks as needed
     ];
 
-    return Container(
+    return SizedBox(
       height: propHeight(55),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,

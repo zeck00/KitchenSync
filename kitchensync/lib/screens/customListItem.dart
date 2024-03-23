@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable, prefer_const_constructors
+// ignore_for_file: must_be_immutable, prefer_const_constructors, file_names
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -14,7 +14,8 @@ class CustomListItem extends StatelessWidget {
   double height;
 
   CustomListItem(
-      {required this.mainTxt,
+      {super.key,
+      required this.mainTxt,
       required this.numberTxt,
       required this.subTxt,
       required this.imagePath,
