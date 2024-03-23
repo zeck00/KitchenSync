@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/customListItem.dart';
@@ -14,10 +14,10 @@ class ItemsScreen extends StatefulWidget {
   final String deviceName;
 
   const ItemsScreen({
-    Key? key,
+    super.key,
     required this.deviceId,
     required this.deviceName,
-  }) : super(key: key);
+  });
 
   @override
   _ItemsScreenState createState() => _ItemsScreenState();
@@ -123,8 +123,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
 class CustomExpansionTile extends StatefulWidget {
   final Category category;
 
-  const CustomExpansionTile({Key? key, required this.category})
-      : super(key: key);
+  const CustomExpansionTile({super.key, required this.category});
 
   @override
   _CustomExpansionTileState createState() => _CustomExpansionTileState();

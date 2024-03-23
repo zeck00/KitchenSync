@@ -1,9 +1,6 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:ffi';
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/customDeviceCard.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -12,6 +9,8 @@ import 'package:kitchensync/styles/AppFonts.dart';
 import 'size_config.dart';
 
 class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
