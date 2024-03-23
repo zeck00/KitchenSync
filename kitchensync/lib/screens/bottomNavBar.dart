@@ -18,7 +18,7 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-  // Define your screens here
+  // Define screens here
   final List<Widget> _screens = [
     HomeScreen(),
     InventoryScreen(),

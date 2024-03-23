@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, dangling_library_doc_comments, file_names, unused_import
 
 /// Builds a custom app bar widget that displays the app name, logo, and profile avatar.
 ///
@@ -8,13 +8,17 @@
 /// This is used as the main app bar throughout the app. It is a stateless widget
 /// that implements [PreferredSizeWidget] to define the app bar height.
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/customListItem.dart';
+import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart'; // Make sure the file name is correct and lowercase
 import 'size_config.dart';
 import 'dart:ui' as ui;
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const CustomAppBar({super.key});
+
   void _showPopup(BuildContext context) {
     Navigator.of(context).push(_PopupRoute());
   }
@@ -39,9 +43,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(left: propWidth(27)),
-                child: CircleAvatar(
-                  radius: propWidth(21.1),
-                  backgroundImage: AssetImage('assets/images/logo.png'),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainLayout()),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: propWidth(21.1),
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
                 ),
               ),
               GestureDetector(

@@ -170,7 +170,7 @@ Widget _buildListItem(String title) {
 Widget _buildCommunicationOptionsSection() {
   return Column(
     children: [
-      SizedBox(height: propHeight(55)),
+      SizedBox(height: propHeight(30)),
       Text(
         'We Listen!',
         style: AppFonts.appname,

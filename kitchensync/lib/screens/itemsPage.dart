@@ -7,49 +7,54 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'dart:ui' as ui;
+import '../backend/dataret.dart';
 
-// Your item structure here is simplified for demonstration
-final List<Map<String, dynamic>> categories = [
-  {
-    "category": "Poultry",
-    "totalWeight": "3.02 KG",
-    "iconPath":
-        "assets/images/Thanksgiving.png", // Replace with actual icon path
-    "items": [
-      {
-        "itemName": "Whole Chicken",
-        "weight": "1.02 KG",
-        "isFresh": false, // Example of an item that's not fresh
-      },
-      {
-        "itemName": "Minced Chicken",
-        "weight": "0.45 KG",
-        "isFresh": true,
-      },
-      {
-        "itemName": "Chicken Thighs",
-        "weight": "0.45 KG",
-        "isFresh": false,
-      }
-      // Add other items here...
-    ],
-  },
-  // Add other categories here...
-];
-
-class ItemsScreen extends StatelessWidget {
+class ItemsScreen extends StatefulWidget {
   final String deviceId; // The device ID passed to this screen
-  final String deviceName =
-      "Antartica 1.3"; // Replace with actual device name if needed
+  final String deviceName;
+
+  const ItemsScreen({
+    Key? key,
+    required this.deviceId,
+    required this.deviceName,
+  }) : super(key: key);
+
+  @override
+  _ItemsScreenState createState() => _ItemsScreenState();
+}
+
+class _ItemsScreenState extends State<ItemsScreen> {
+  bool _isLoading = true;
+  List<Category> categories = [];
+
   void _showPopup(BuildContext context) {
     Navigator.of(context).push(_PopupRoute());
   }
 
-  ItemsScreen({Key? key, required this.deviceId}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    _loadCategoriesAndItems();
+  }
+
+  Future<void> _loadCategoriesAndItems() async {
+    final allItems = await Item.loadAllItems('assets/data/items.json');
+    final loadedCategories =
+        await Category.loadCategories('assets/data/categories.json');
+
+    for (var category in loadedCategories) {
+      category.assignItems(allItems);
+    }
+
+    setState(() {
+      categories = loadedCategories;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    initSizeConfig(context); // Initialize the size configuration
+    initSizeConfig(context);
 
     return Scaffold(
       body: Padding(
@@ -73,7 +78,7 @@ class ItemsScreen extends StatelessWidget {
                 ),
                 Expanded(child: Container()),
                 Text(
-                  deviceName,
+                  'deviceName',
                   style: AppFonts.welcomemsg1,
                 ),
                 Expanded(child: Container()),
@@ -116,9 +121,10 @@ class ItemsScreen extends StatelessWidget {
 }
 
 class CustomExpansionTile extends StatefulWidget {
-  final Map<String, dynamic> category;
+  final Category category;
 
-  CustomExpansionTile({Key? key, required this.category}) : super(key: key);
+  const CustomExpansionTile({Key? key, required this.category})
+      : super(key: key);
 
   @override
   _CustomExpansionTileState createState() => _CustomExpansionTileState();
@@ -149,19 +155,19 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
             });
           },
           leading: Image.asset(
-            category['iconPath'],
+            category.catIcon,
             width: propWidth(36),
             height: propHeight(36),
           ),
           title: Row(
             children: <Widget>[
               Text(
-                category['category'],
+                category.categoryName,
                 style: AppFonts.cardTitle,
               ),
               SizedBox(width: propWidth(13)),
               Text(
-                category['totalWeight'],
+                '${category.getTotalQuantity()}',
                 style: AppFonts.numbers,
               ),
               Spacer(), // Use Spacer for automatically calculated remaining space
@@ -196,15 +202,16 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                 ),
               ),
               child: Column(
-                children: category['items'].map<Widget>((item) {
+                children: category.items.map<Widget>((item) {
                   return ListTile(
                     title: Row(
                       children: [
                         Text(
-                          item['itemName'],
+                          item.itemName,
                           style: AppFonts.servicename,
                         ),
-                        if (!item['isFresh']) // Show warning icon if not fresh
+                        if (item.status !=
+                            'fresh') // Show warning icon if not fresh
                           Padding(
                             padding: EdgeInsets.only(left: propWidth(8)),
                             child: Image.asset(
@@ -216,7 +223,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                       ],
                     ),
                     trailing: Text(
-                      item['weight'],
+                      '${item.quantity}',
                       style: AppFonts.numbers1,
                     ),
                   );

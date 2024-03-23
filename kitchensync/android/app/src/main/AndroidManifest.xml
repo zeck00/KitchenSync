@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <application
         android:label="kitchensync"
         android:name="${applicationName}"

@@ -1,24 +1,247 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_super_parameters, deprecated_member_use, prefer_const_constructors_in_immutables, use_build_context_synchronously, library_private_types_in_public_api, avoid_print, unused_element, unused_import
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
+import 'backend/dataret.dart';
 import 'styles/AppColors.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  // Setup initialization settings for Android
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  // Define initialization settings for iOS and Android
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  // Initialize the plugin
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    // onSelectNotification: (String? payload) async {
+    //   // Handle notification tapped logic here
+    // },
+  );
+
+  // Create a channel for Android (Android 8.0+)
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'kitchen_sync_channel', // Same as used in notification details
+    'Item Expiration Notifications', // Title for the channel
+    description:
+        'This channel is used for item expiration notifications.', // Description for the channel
+    importance: Importance.max,
+  );
+
+  // Check for platform version and create the channel using the plugin
+  if (Platform.isAndroid) {
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+Future<void> scheduleNotification(
+    int daysBefore, String itemId, String itemName) async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+    'kitchen_sync_channel',
+    'Item Expiration',
+    channelDescription: 'Notifications for items expiring soon',
+    importance: Importance.max,
+    priority: Priority.high,
+    colorized: true,
+    color: AppColors.primary,
+    ticker: 'ticker',
+  );
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
 
-  // This widget is the root of your application.
+  final now = tz.TZDateTime.now(tz.local);
+  final scheduledDate = now.add(Duration(days: daysBefore));
+
+  /// Ensure the scheduled time is in the future
+  if (scheduledDate.isBefore(now)) {
+    print("Scheduled date is in the past. Adjusting to future.");
+    return; // This prevents scheduling a notification for the past.
+  }
+
+  // Generate a unique ID for each notification that fits within a 32-bit integer range
+  var itemIdHash = itemId.hashCode;
+  // Generate a unique ID for each notification
+  int notificationId = itemIdHash %
+      2147483647; // 2^31 - 1, which is the maximum positive value for a 32-bit signed binary integer
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    notificationId, // Use the unique ID
+    'Item Expiring Soon',
+    '$itemName is expiring in $daysBefore days.',
+    scheduledDate,
+    platformChannelSpecifics,
+    androidAllowWhileIdle: true,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents:
+        DateTimeComponents.time, // Consider adjusting based on requirements
+  );
+}
+
+Future<void> _loadItemsAndScheduleNotifications(BuildContext context) async {
+  try {
+    final items = await Item.loadAllItems('assets/data/items.json');
+    for (var item in items) {
+      await item.scheduleExpirationNotifications();
+    }
+  } catch (e, stacktrace) {
+    print('Error: $e');
+    print('Stacktrace: $stacktrace');
+    _showErrorPage(context);
+  }
+}
+
+void _showErrorPage(BuildContext context) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    navigatorKey.currentState?.pushReplacement(MaterialPageRoute(
+      builder: (context) => ErrorScreen(),
+    ));
+  });
+}
+
+Future<void> _checkAndRequestNotificationPermissions(
+    BuildContext context) async {
+  final status = await Permission.notification.status;
+  if (!status.isGranted) {
+    // Showing a pre-permission dialog to explain why notifications are needed
+    bool showRationale =
+        await Permission.notification.shouldShowRequestRationale;
+    if (showRationale) {
+      // Show your own custom dialog or informational UI to explain why you need this permission
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Notification Permission"),
+          content: Text(
+              "We need notification permissions to alert you about item expirations. Allow notifications in the next prompt?"),
+          actions: [
+            TextButton(
+              child: Text("Deny"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Allow"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _requestNotificationPermission(); // Proceed to request permission
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Directly request for permission without rationale
+      _requestNotificationPermission();
+    }
+  }
+}
+
+Future<void> _checkNotificationPermission() async {
+  final status = await Permission.notification.status;
+  if (!status.isGranted) {
+    // Notifications permission has not been granted.
+    // You can prompt the user with more information here if you want.
+    _requestNotificationPermission();
+  }
+}
+
+Future<void> _requestNotificationPermission() async {
+  final status = await Permission.notification.request();
+  if (status.isGranted) {
+    // Permission granted
+    print("Notification Permission granted.");
+  } else if (status.isDenied) {
+    // Permission denied
+    print("Notification Permission denied.");
+  } else if (status.isPermanentlyDenied) {
+    // Open app settings if permission is permanently denied
+    openAppSettings();
+  }
+}
+
+class MyApp extends StatefulWidget {
+  MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _loadItemsAndScheduleNotifications(context);
+      _checkAndRequestNotificationPermissions(context);
+      await _showWelcomeNotification();
+    });
+  }
+
+  Future<void> _showWelcomeNotification() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Check if 'first_time' key exists or is set to true
+    if (prefs.getBool('first_time') ?? true) {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'kitchen_sync_channel',
+        'Welcome to KitchenSync',
+        channelDescription: 'General notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+        color: AppColors.primary,
+        ticker: 'ticker',
+      );
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Notification Permission Granted!',
+        'We use notifications to enhance your experience. KitchenSync is happy to have you on board!',
+        platformChannelSpecifics,
+      );
+      // Set 'first_time' key to false so this only happens once
+      await prefs.setBool('first_time', false);
+    }
+  }
+
+  // This widget is the root of application.
   @override
   Widget build(BuildContext context) {
     initSizeConfig(context);
-    // Define your light theme colors
+    // Define light theme colors
     final ColorScheme lightColorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.light, // Replace with your light seed color
+      seedColor: AppColors.light,
       // Define other colors if needed
     );
 
@@ -30,6 +253,7 @@ class MyApp extends StatelessWidget {
     );
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       themeMode: ThemeMode.light, // Use system theme mode by default
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
