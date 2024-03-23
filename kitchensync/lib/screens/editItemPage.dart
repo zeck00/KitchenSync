@@ -1,21 +1,28 @@
-// ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables, unused_element
+// ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables, unused_element, unnecessary_import
+
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
+import 'package:path_provider/path_provider.dart';
 
-class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+class EditItemPage extends StatefulWidget {
+  final Item itemToEdit;
+
+  const EditItemPage({super.key, required this.itemToEdit});
 
   @override
-  _AddItemPageState createState() => _AddItemPageState();
+  _EditItemPageState createState() => _EditItemPageState();
 }
 
-class _AddItemPageState extends State<AddItemPage> {
+class _EditItemPageState extends State<EditItemPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late List<Kitchen> kitchens = [];
   late List<Device> devices = [];
@@ -25,75 +32,93 @@ class _AddItemPageState extends State<AddItemPage> {
   String? selectedCategory;
   Item? newItem;
 
-  // Initialize the text editing controllers
-  final TextEditingController _itemNameController = TextEditingController();
-  final TextEditingController _nfcTagIdController = TextEditingController();
-  final TextEditingController _pDateController = TextEditingController();
-  final TextEditingController _xDateController = TextEditingController();
-  final TextEditingController _inDateController = TextEditingController();
-  final TextEditingController _itemInfoController = TextEditingController();
-  final TextEditingController _statusController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _unitController = TextEditingController();
+  // Modify your controllers initialization to use the existing item data
+  late final TextEditingController _itemNameController =
+      TextEditingController(text: widget.itemToEdit.itemName);
+  late final TextEditingController _statusController =
+      TextEditingController(text: widget.itemToEdit.status);
+  late final TextEditingController _nfcTagIdController =
+      TextEditingController(text: widget.itemToEdit.nfcTagID);
+  late final TextEditingController _pDateController =
+      TextEditingController(text: widget.itemToEdit.pDate);
+  late final TextEditingController _xDateController =
+      TextEditingController(text: widget.itemToEdit.xDate);
+  late final TextEditingController _inDateController =
+      TextEditingController(text: widget.itemToEdit.inDate);
+  late final TextEditingController _itemInfoController =
+      TextEditingController(text: widget.itemToEdit.itemInfo);
+  late final TextEditingController _quantityController =
+      TextEditingController(text: widget.itemToEdit.quantity.toString());
+  late final TextEditingController _unitController =
+      TextEditingController(text: widget.itemToEdit.unit);
 
-  String generateItemId() {
-    // Using DateTime to generate a unique ID for simplicity.
-    return DateTime.now().millisecondsSinceEpoch.toString();
+  // This method assumes you have some way to update the item in your data store.
+  Future<void> initializeData() async {
+    //   final directory = await getApplicationDocumentsDirectory();
+    //   final path = directory.path;
+    //   final file = File('$path/items.json');
+
+    //   // If the file does not exist in the documents directory, then copy from assets
+    //   if (!(await file.exists())) {
+    //     // Load the initial JSON data from assets
+    //     String data = await rootBundle.loadString('assets/data/items.json');
+
+    //     // Write the data to the documents directory
+    //     await file.writeAsString(data);
+    //   }
+    // }
+
+    // Future<void> updateItem(Item updatedItem) async {
+    //   final directory = await getApplicationDocumentsDirectory();
+    //   final path = directory.path;
+    //   final file = File('$path/items.json');
+
+    //   // Read the current items JSON file
+    //   final String response = await file.readAsString();
+    //   List<dynamic> data = await json.decode(response);
+
+    //   // Convert the JSON to a list of Items
+    //   List<Item> items = List<Item>.from(data.map((item) => Item.fromJson(item)));
+
+    //   // Find and replace the updated item
+    //   int index = items.indexWhere((item) => item.itemID == updatedItem.itemID);
+    //   if (index != -1) {
+    //     items[index] = updatedItem;
+    //   } else {
+    //     // If the item is not found in the list, it is new so we add it
+    //     items.add(updatedItem);
+    //   }
+
+    //   String updatedJson =
+    //       json.encode(items.map((item) => item.toJson()).toList());
+
+    //   // Write the updated JSON string to the file
+    //   await file.writeAsString(updatedJson);
   }
 
-  void createItem() {
+  void editItem() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Create a new item using the controllers
-      newItem = Item(
-        itemID: generateItemId(),
+      // Update the existing item using the controllers
+      Item updatedItem = widget.itemToEdit.copyWith(
         itemName: _itemNameController.text,
         nfcTagID: _nfcTagIdController.text,
-        pDate: selectedPDate != null
-            ? DateFormat('yyyy-MM-dd').format(selectedPDate!)
-            : '',
-        xDate: selectedXDate != null
-            ? DateFormat('yyyy-MM-dd').format(selectedXDate!)
-            : '',
-        inDate: DateFormat('yyyy-MM-dd').format(selectedInDate),
+        pDate: _pDateController.text,
+        xDate: _xDateController.text,
+        inDate: _inDateController.text,
         itemInfo: _itemInfoController.text,
-        status: selectedStatus ?? '',
-        category: selectedCategory ?? '',
-        quantity: int.tryParse(_quantityController.text) ?? 0,
-        unit: selectedUnit ?? '',
+        status: _statusController.text,
+        category: selectedCategory ?? widget.itemToEdit.category,
+        quantity: int.tryParse(_quantityController.text) ??
+            widget.itemToEdit.quantity,
+        unit: _unitController.text,
       );
 
-      addItemToSelectedDevice(newItem!);
+      // updateItem(updatedItem);
 
       // Show a success message or take other appropriate action
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     behavior: SnackBarBehavior.fixed,
-      //     content: Row(
-      //       children: [
-      //         Icon(Icons.check_circle,
-      //             color: AppColors.light), // Your custom icon
-      //         // Spacing between icon and text
-      //         Expanded(
-      //           child: Text(
-      //             'Item added successfully',
-      //             style: TextStyle(color: AppColors.light),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //     backgroundColor: AppColors.primary,
-      //     shape: RoundedRectangleBorder(
-      //       borderRadius: BorderRadius.circular(17),
-      //     ),
-      //   ),
-      // );
-
-      _showCustomOverlay(
-          context, newItem!.itemName); // Pass the item name dynamically
-
-      clearFormFields();
+      _showCustomOverlay(context, "${updatedItem.itemName} Edited");
     }
   }
 
@@ -106,11 +131,6 @@ class _AddItemPageState extends State<AddItemPage> {
 
     // Wait for 2 seconds and remove the overlay
     Future.delayed(Duration(seconds: 3)).then((value) => overlayEntry.remove());
-  }
-
-  void addItemToSelectedDevice(Item item) {
-    // Add your logic to add the item to the selected device's list
-    // Update the JSON file with the new list of items
   }
 
   void clearFormFields() {
@@ -151,6 +171,27 @@ class _AddItemPageState extends State<AddItemPage> {
   @override
   void initState() {
     super.initState();
+    // Ensure that the initial status is in the list, or null if not.
+    String? initialStatus = widget.itemToEdit.status;
+    List<String> statusOptions = [
+      'fresh',
+      'Fresh',
+      'Old',
+      'Expired',
+      'Better Used Soon',
+      'Damaged',
+      'Dry',
+    ];
+
+    if (!statusOptions.contains(initialStatus)) {
+      initialStatus = 'Fresh'; // or some default value like 'Fresh'
+    }
+
+    selectedStatus = initialStatus;
+    selectedCategory = widget.itemToEdit.category;
+    selectedPDate = DateFormat('yyyy-MM-dd').parse(widget.itemToEdit.pDate);
+    selectedXDate = DateFormat('yyyy-MM-dd').parse(widget.itemToEdit.xDate);
+    selectedInDate = DateFormat('yyyy-MM-dd').parse(widget.itemToEdit.inDate);
     fetchInitialData();
   }
 
@@ -244,7 +285,7 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                     Expanded(child: Container()),
                     Text(
-                      'Add Item',
+                      'Edit Item',
                       style: AppFonts.appname,
                     ),
                     Expanded(child: Container()),
@@ -257,17 +298,18 @@ class _AddItemPageState extends State<AddItemPage> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          createItem();
+                          editItem();
                           // Call the function to save the new item
                         }
                       },
-                      child: Text('ADD'),
+                      child: Text('Edit'),
                     ),
                     SizedBox(width: propWidth(10)),
                   ],
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _itemNameController,
                   decoration: InputDecoration(
                     labelText: 'Item Name',
                     fillColor: AppColors.light,
@@ -291,6 +333,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 buildCategoryDropdown(),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _nfcTagIdController,
                   decoration: InputDecoration(
                     labelText: 'NFC Tag ID',
                     fillColor: AppColors.light,
@@ -322,9 +365,13 @@ class _AddItemPageState extends State<AddItemPage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(propHeight(17))),
                     ),
-                    child: Text(selectedPDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedPDate!)),
+                    child: Text(
+                      selectedPDate != null
+                          ? DateFormat('yyyy-MM-dd').format(selectedPDate!)
+                          : 'Select Date',
+                      style: TextStyle(
+                          color: Colors.black54), // Add text style if needed
+                    ),
                   ),
                 ),
                 SizedBox(height: propHeight(10)),
@@ -345,9 +392,13 @@ class _AddItemPageState extends State<AddItemPage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(propHeight(17))),
                     ),
-                    child: Text(selectedXDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedXDate!)),
+                    child: Text(
+                      selectedPDate != null
+                          ? DateFormat('yyyy-MM-dd').format(selectedXDate!)
+                          : 'Select Date',
+                      style: TextStyle(
+                          color: Colors.black54), // Add text style if needed
+                    ),
                   ),
                 ),
                 SizedBox(height: propHeight(10)),
@@ -367,12 +418,18 @@ class _AddItemPageState extends State<AddItemPage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(propHeight(17))),
                     ),
-                    child:
-                        Text(DateFormat('yyyy-MM-dd').format(selectedInDate)),
+                    child: Text(
+                      selectedInDate != null
+                          ? DateFormat('yyyy-MM-dd').format(selectedInDate)
+                          : 'Select Date',
+                      style: TextStyle(
+                          color: Colors.black54), // Add text style if needed
+                    ),
                   ),
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _itemInfoController,
                   decoration: InputDecoration(
                     labelText: 'Item Info',
                     fillColor: AppColors.light,
@@ -392,14 +449,17 @@ class _AddItemPageState extends State<AddItemPage> {
                   onChanged: (newValue) {
                     setState(() {
                       selectedStatus = newValue;
+                      _statusController.text = newValue!;
                     });
                   },
                   items: <String>[
+                    'fresh',
                     'Fresh',
                     'Old',
                     'Expired',
                     'Better Used Soon',
-                    'Damaged'
+                    'Damaged',
+                    'Dry',
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -414,6 +474,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _quantityController,
                   decoration: InputDecoration(
                     labelText: 'Quantity',
                     border: OutlineInputBorder(
@@ -455,11 +516,6 @@ class _AddItemPageState extends State<AddItemPage> {
                     fillColor: AppColors.light,
                   ),
                 ),
-                SizedBox(height: propHeight(10)),
-                buildKitchenDropdown(),
-                SizedBox(height: propHeight(10)),
-                buildDeviceDropdown(),
-                SizedBox(height: propHeight(10)),
               ],
             ),
           ),
@@ -468,91 +524,13 @@ class _AddItemPageState extends State<AddItemPage> {
     );
   }
 
-  // Build a Dropdown button for kitchens
-  Widget buildKitchenDropdown() {
-    return DropdownButtonFormField<String>(
-      value: selectedKitchen,
-      onSaved: (newValue) => selectedKitchen = newValue!,
-      onChanged: (newValue) {
-        setState(() {
-          selectedKitchen = newValue!;
-          // TODO: Load devices based on selected kitchen
-        });
-      },
-      items: kitchens.map<DropdownMenuItem<String>>((Kitchen kitchen) {
-        return DropdownMenuItem<String>(
-          value: kitchen.kitchenID,
-          child: Text(kitchen.kitchenName),
-        );
-      }).toList(),
-      decoration: InputDecoration(
-        labelText: 'Select Kitchen',
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(propHeight(17)),
-          borderSide: BorderSide(color: AppColors.primary),
-        ),
-        filled: true,
-        fillColor: AppColors.light,
-      ),
-    );
-  }
-
-  // TODO: Add methods to build Device and Category dropdowns, and fields for Item details
-
-  // Build a Dropdown button for devices
-  Widget buildDeviceDropdown() {
-    return DropdownButtonFormField<String>(
-      value: selectedDevice,
-      onSaved: (newValue) => selectedDevice = newValue!,
-      onChanged: (newValue) async {
-        setState(() {
-          selectedDevice = newValue!;
-          categories = []; // Clear categories when device changes
-        });
-        // Find the selected device
-        var selectedDeviceObj = devices.firstWhere(
-          (device) => device.deviceID == selectedDevice,
-          orElse: () =>
-              Device(deviceID: '', deviceName: '', categoriesFile: ''),
-        );
-        await selectedDeviceObj
-            .loadCategories('assets/data/${selectedDeviceObj.categoriesFile}');
-        setState(() {
-          categories = selectedDeviceObj.categories;
-          selectedCategory =
-              categories.isNotEmpty ? categories.first.categoryID : null;
-        });
-      },
-      items: devices.map<DropdownMenuItem<String>>((Device device) {
-        return DropdownMenuItem<String>(
-          value: device.deviceID,
-          child: Text(device.deviceName),
-        );
-      }).toList(),
-      decoration: InputDecoration(
-        labelText: 'Select Device',
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(propHeight(17)),
-          borderSide: BorderSide(color: AppColors.primary),
-        ),
-        filled: true,
-        fillColor: AppColors.light,
-      ),
-    );
-  }
-
   // Build a Dropdown button for categories
   Widget buildCategoryDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedCategory,
-      onSaved: (newValue) => selectedCategory = newValue!,
+      value: selectedCategory, // make sure this is the initially selected value
       onChanged: (newValue) {
         setState(() {
-          selectedCategory = newValue!;
+          selectedCategory = newValue;
         });
       },
       items: categories.map<DropdownMenuItem<String>>((Category category) {
@@ -564,7 +542,9 @@ class _AddItemPageState extends State<AddItemPage> {
       decoration: InputDecoration(
         labelText: 'Select Category',
         contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
+          horizontal: propWidth(20),
+          vertical: propHeight(15),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(propHeight(17)),
           borderSide: BorderSide(color: AppColors.primary),
@@ -600,7 +580,7 @@ OverlayEntry _createOverlayEntry(BuildContext context, String itemName) {
               ),
               SizedBox(height: propHeight(10)),
               Text(
-                '$itemName Added',
+                'Edited Successfully!',
                 style: AppFonts.locCard,
               ),
             ],

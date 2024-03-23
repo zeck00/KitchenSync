@@ -14,6 +14,19 @@
         "unit": "milliliters"
       },
       {
+        "itemID": "0021",
+        "itemName": "Eggs",
+        "nfcTagID": "nfc0021",
+        "pDate": "2024-06-01",
+        "xDate": "2024-05-20",
+        "inDate": "2024-06-30",
+        "itemInfo": "Organic Eggs",
+        "status": "fresh",
+        "category": "Eggs",
+        "quantity": 15,
+        "unit": "Pieces"
+      },
+      {
         "itemID": "0002",
         "itemName": "Eggs",
         "nfcTagID": "nfc0002",
@@ -87,9 +100,9 @@
         "inDate": "2024-06-02",
         "itemInfo": "Fresh Atlantic Salmon Fillets",
         "status": "fresh",
-        "category": "Seafood",
-        "quantity": 4,
-        "unit": "Pieces"
+        "category": "SeaFood",
+        "quantity": 350,
+        "unit": "Grams"
       },
       {
         "itemID": "0008",
@@ -259,7 +272,111 @@
         "category": "Pantry",
         "quantity": 500,
         "unit": "Grams"
-    } 
+    },
+    
+    {
+      "itemID": "0022",
+      "itemName": "Carrots",
+      "nfcTagID": "nfc0022",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-10",
+      "inDate": "2024-06-02",
+      "itemInfo": "Organic Carrots, 500g",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 500,
+      "unit": "Grams"
+    },
+    {
+      "itemID": "0023",
+      "itemName": "Bell Peppers",
+      "nfcTagID": "nfc0023",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-07",
+      "inDate": "2024-06-02",
+      "itemInfo": "Assorted Bell Peppers, Pack of 3",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 3,
+      "unit": "Pieces"
+    },
+    {
+      "itemID": "0024",
+      "itemName": "Onions",
+      "nfcTagID": "nfc0024",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-15",
+      "inDate": "2024-06-02",
+      "itemInfo": "Yellow Onions, Bag of 1kg",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 1000,
+      "unit": "Grams"
+    },
+    {
+      "itemID": "0025",
+      "itemName": "Lettuce",
+      "nfcTagID": "nfc0025",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-07",
+      "inDate": "2024-06-02",
+      "itemInfo": "Fresh Green Lettuce Head",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 1,
+      "unit": "Piece"
+    },  {
+      "itemID": "0026",
+      "itemName": "Cucumber",
+      "nfcTagID": "nfc0021",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-07",
+      "inDate": "2024-06-02",
+      "itemInfo": "Fresh Cucumber",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 1,
+      "unit": "Piece"
+    },
+    {
+      "itemID": "0027",
+      "itemName": "Carrots",
+      "nfcTagID": "nfc0022",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-10",
+      "inDate": "2024-06-02",
+      "itemInfo": "Organic Carrots, 500g",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 500,
+      "unit": "Grams"
+    },
+    {
+      "itemID": "0028",
+      "itemName": "Onions",
+      "nfcTagID": "nfc0024",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-15",
+      "inDate": "2024-06-02",
+      "itemInfo": "Yellow Onions, Bag of 1kg",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 1000,
+      "unit": "Grams"
+    },
+    {
+      "itemID": "0029",
+      "itemName": "Lettuce",
+      "nfcTagID": "nfc0025",
+      "pDate": "2024-06-01",
+      "xDate": "2024-06-07",
+      "inDate": "2024-06-02",
+      "itemInfo": "Fresh Green Lettuce Head",
+      "status": "fresh",
+      "category": "Produce",
+      "quantity": 1,
+      "unit": "Piece"
+    }
     ]
   }
   

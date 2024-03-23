@@ -5,12 +5,12 @@
     {
       "deviceID": "001",
       "deviceName": "Refrigerator",
-      "categoriesFile": "device_001.json"
+      "categoriesFile": "categories.json"
     },
     {
       "deviceID": "002",
-      "deviceName": "Cabinet",
-      "categoriesFile": "device_002.json"
+      "deviceName": "Refrigerator1",
+      "categoriesFile": "categories_002.json"
     }
   ]
 }

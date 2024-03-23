@@ -3,12 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/addItemPage.dart';
 import 'package:kitchensync/screens/customListItem.dart';
-import 'package:kitchensync/screens/homePage.dart';
+import 'package:kitchensync/screens/editItemPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'dart:ui' as ui;
 import '../backend/dataret.dart';
+import 'inventoryPage.dart';
 
 class ItemsScreen extends StatefulWidget {
   final String deviceId; // The device ID passed to this screen
@@ -79,7 +80,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 ),
                 Expanded(child: Container()),
                 Text(
-                  'deviceName',
+                  'All Items',
                   style: AppFonts.welcomemsg1,
                 ),
                 Expanded(child: Container()),
@@ -91,7 +92,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                       );
                     },
                     child: Icon(
-                      Icons.add_circle_outline_rounded,
+                      Icons.add_circle_rounded,
                       color: AppColors.dark,
                       size: propWidth(30),
                     )),
@@ -135,7 +136,8 @@ class CustomExpansionTile extends StatefulWidget {
 }
 
 class _CustomExpansionTileState extends State<CustomExpansionTile> {
-  bool isExpanded = false;
+  // Initially set isExpanded to true for default expanded state
+  bool isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -147,12 +149,14 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
       ),
       color: isExpanded
           ? AppColors.primary
-          : AppColors.primary, // Change the background color when expanded
+          : AppColors
+              .primary, // You may want to use different colors for expanded/non-expanded state
       child: Theme(
         data: Theme.of(context).copyWith(
           unselectedWidgetColor: AppColors.light, // Set icon color here
         ),
         child: ExpansionTile(
+          initiallyExpanded: isExpanded, // Set to true for default expanded
           onExpansionChanged: (bool expanded) {
             setState(() {
               isExpanded = expanded;
@@ -171,7 +175,10 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               ),
               SizedBox(width: propWidth(13)),
               Text(
-                '${category.getTotalQuantity()}',
+                getUnitForCategory(
+                    category.categoryName,
+                    category
+                        .getTotalQuantity()), // Adjusted to use the custom unit function
                 style: AppFonts.numbers,
               ),
               Spacer(), // Use Spacer for automatically calculated remaining space
@@ -182,12 +189,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                     height: propHeight(30),
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen()), // Replace HomeScreen() with the recpies generation page
-                    );
+                    // Navigate to the recipe generation page
                   }),
             ],
           ),
@@ -208,6 +210,8 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               child: Column(
                 children: category.items.map<Widget>((item) {
                   return ListTile(
+                    onTap: () =>
+                        _showItemDetailsPopup(context, item), // Show the popup
                     title: Row(
                       children: [
                         Text(
@@ -227,7 +231,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                       ],
                     ),
                     trailing: Text(
-                      '${item.quantity}',
+                      '${item.quantity} ${item.unit}', // Displaying quantity with unit
                       style: AppFonts.numbers1,
                     ),
                   );
@@ -325,4 +329,126 @@ class _PopupRoute extends PopupRoute {
       ),
     );
   }
+}
+
+void _showItemDetailsPopup(BuildContext context, Item item) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    item.itemName,
+                    style: AppFonts.appname,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.mode_edit_rounded),
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog first
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => EditItemPage(itemToEdit: item),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              Text(
+                item.itemInfo,
+                style: AppFonts.numbers1,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.light.withOpacity(0.9),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Text("NFC Tag:", style: AppFonts.appname),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child:
+                        Text(item.nfcTagID ?? 'N/A', style: AppFonts.numbers1),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Text("Prod. Date:", style: AppFonts.appname),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(item.pDate, style: AppFonts.numbers1),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Text("Exp Date:", style: AppFonts.appname),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(item.xDate, style: AppFonts.numbers1),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Text("Status:", style: AppFonts.appname),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(item.status, style: AppFonts.numbers1),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Text("Quantity:", style: AppFonts.appname),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text('${item.quantity} ${item.unit}',
+                        style: AppFonts.numbers1),
+                  ),
+                ],
+              ),
+              // ... any other details
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close', style: AppFonts.appname),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: unused_import
+// ignore_for_file: unused_import, unnecessary_this
 
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -187,6 +187,37 @@ class Item {
       category: data['category'],
       quantity: data['quantity'],
       unit: data['unit'],
+    );
+  }
+  Map<String, dynamic> toJson() => {
+        'itemID': itemID,
+        'itemName': itemName,
+        // ... all the fields of the item
+      };
+  Item copyWith({
+    String? itemName,
+    String? nfcTagID,
+    String? pDate,
+    String? xDate,
+    String? inDate,
+    String? itemInfo,
+    String? status,
+    String? category,
+    int? quantity,
+    String? unit,
+  }) {
+    return Item(
+      itemID: this.itemID, // Keep the existing ID
+      itemName: itemName ?? this.itemName,
+      nfcTagID: nfcTagID ?? this.nfcTagID,
+      pDate: pDate ?? this.pDate,
+      xDate: xDate ?? this.xDate,
+      inDate: inDate ?? this.inDate,
+      itemInfo: itemInfo ?? this.itemInfo,
+      status: status ?? this.status,
+      category: category ?? this.category,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
     );
   }
 

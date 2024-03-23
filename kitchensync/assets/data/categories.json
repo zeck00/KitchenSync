@@ -8,7 +8,7 @@
       },
       {
         "categoryID": "02",
-        "categoryName": "Poltury",
+        "categoryName": "Poultry",
         "iconPath": "assets/images/Thanksgiving.png",
         "itemPath": "items.json"
       },
@@ -26,14 +26,20 @@
       },
       {
         "categoryID": "05",
-        "categoryName": "Poltury",
-        "iconPath": "assets/images/Thanksgiving.png",
+        "categoryName": "SeaFood",
+        "iconPath": "assets/images/Fish.png",
         "itemPath": "items.json"
       },
       {
         "categoryID": "06",
-        "categoryName": "Poltury",
-        "iconPath": "assets/images/Thanksgiving.png",
+        "categoryName": "Meat",
+        "iconPath": "assets/images/Steak.png",
+        "itemPath": "items.json"
+      },
+      {
+        "categoryID": "07",
+        "categoryName": "Pantry",
+        "iconPath": "assets/images/Steak.png",
         "itemPath": "items.json"
       }
       

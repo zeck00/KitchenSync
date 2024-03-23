@@ -88,8 +88,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                 child: Container(
                   alignment: Alignment.center,
-                  color: AppColors.light
-                      .withOpacity(0.8), // Semi-transparent overlay
+                  color: AppColors.light,
+                  // Semi-transparent overlay
                   child: CircularProgressIndicator(
                     color: AppColors.dark,
                     strokeWidth: 6,
@@ -254,14 +254,35 @@ class _InventoryScreenState extends State<InventoryScreen> {
               Text(category.categoryName, style: AppFonts.cardTitle),
               SizedBox(height: propHeight(10)),
               Text(
-                  category.categoryName == 'Eggs'
-                      ? '${category.getTotalQuantity()} Pcs'
-                      : '${category.getTotalQuantity()} KG',
+                  getUnitForCategory(
+                      category.categoryName, category.getTotalQuantity()),
                   style: AppFonts.numbers),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+String getUnitForCategory(String categoryName, double quantity) {
+  switch (categoryName) {
+    case 'Dairy':
+      return '$quantity mL'; // Assuming dairy is measured in liters
+    case 'Poltury':
+      return '$quantity Kg'; // Assuming poultry is measured in kilograms
+    case 'Produce':
+      return '$quantity Kg'; // Assuming produce is measured in kilograms
+    case 'Eggs':
+      return '$quantity Pcs'; // Eggs are counted in pieces
+    case 'SeaFood':
+      return '$quantity g'; // Seafood is assumed to be measured in kilograms
+    case 'Meat':
+      return '$quantity g'; // Meat is also measured in grams
+    case 'Pantry':
+      return '$quantity g'; // Pantry is also measured in grams
+    // Add more cases as needed for other categories
+    default:
+      return '$quantity Units'; // A generic fallback
   }
 }
