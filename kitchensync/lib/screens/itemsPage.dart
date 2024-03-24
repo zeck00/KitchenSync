@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/addItemPage.dart';
+import 'package:kitchensync/screens/chatPage.dart';
 import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/screens/editItemPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -189,7 +190,10 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                     height: propHeight(30),
                   ),
                   onTap: () {
-                    // Navigate to the recipe generation page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChatScreen()),
+                    );
                   }),
             ],
           ),

@@ -269,10 +269,10 @@ String getUnitForCategory(String categoryName, double quantity) {
   switch (categoryName) {
     case 'Dairy':
       return '$quantity mL'; // Assuming dairy is measured in liters
-    case 'Poltury':
-      return '$quantity Kg'; // Assuming poultry is measured in kilograms
+    case 'Poultry':
+      return '$quantity g'; // Assuming poultry is measured in kilograms
     case 'Produce':
-      return '$quantity Kg'; // Assuming produce is measured in kilograms
+      return '$quantity g'; // Assuming produce is measured in kilograms
     case 'Eggs':
       return '$quantity Pcs'; // Eggs are counted in pieces
     case 'SeaFood':

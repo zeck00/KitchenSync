@@ -1,0 +1,335 @@
+{
+    "responses": {
+      "Milk": [
+        "Enjoy a refreshing glass of cold milk with your favorite cookies or biscuits.",
+        "Use milk as a base for creamy sauces and soups to add richness and flavor.",
+        "Make homemade yogurt or cheese with fresh milk for a delightful culinary experience."
+      ],
+      "Eggs": [
+        "Whip up a fluffy frittata packed with veggies for a nutritious breakfast or brunch option.",
+        "Try baking a batch of homemade cupcakes or muffins using eggs for a moist and tender crumb.",
+        "Prepare a classic Eggs Benedict topped with hollandaise sauce for an indulgent weekend brunch treat."
+      ],
+      "Cheddar Cheese": [
+        "Create a gourmet cheese board with aged cheddar, crackers, fruits, and nuts for a delightful appetizer.",
+        "Melt cheddar cheese over a piping hot bowl of chili or a juicy burger for a comforting meal.",
+        "Bake a batch of savory cheddar cheese scones or biscuits to enjoy with afternoon tea or coffee."
+      ],
+      "Apples": [
+        "Slice apples and dip them in peanut butter or caramel for a satisfying and healthy snack.",
+        "Bake a warm apple crisp or pie with a buttery oat topping for a comforting dessert.",
+        "Add diced apples to salads or coleslaw for a sweet and crunchy twist."
+      ],
+      "Orange Juice": [
+        "Start your day with a refreshing glass of freshly squeezed orange juice for a vitamin C boost.",
+        "Use orange juice as a marinade for grilled chicken or fish to add brightness and flavor.",
+        "Mix orange juice with sparkling water and fresh mint for a homemade citrus spritzer."
+      ],
+      "Whole Wheat Bread": [
+        "Make a hearty avocado toast with sliced tomatoes and a sprinkle of sea salt for a nutritious breakfast or snack.",
+        "Use whole wheat bread to create delicious sandwiches filled with your favorite meats, cheeses, and veggies.",
+        "Transform stale whole wheat bread into crunchy homemade croutons to top salads or soups."
+      ],
+      "Salmon Fillets": [
+        "Grill or bake salmon fillets with a honey glaze and serve them with roasted vegetables for a healthy and flavorful meal.",
+        "Poach salmon in a flavorful broth and serve it over a bed of couscous or quinoa for an elegant dinner option.",
+        "Flake cooked salmon and toss it with pasta, lemon, and herbs for a quick and easy weeknight meal."
+      ],
+      "Spinach": [
+        "Sauté spinach with garlic and olive oil for a nutritious side dish packed with flavor.",
+        "Blend spinach into smoothies or juices for a refreshing and healthy drink option.",
+        "Use spinach as a base for salads or wraps, adding your favorite protein and toppings for a satisfying meal."
+      ],
+      "Tomatoes": [
+        "Slice tomatoes and layer them with fresh mozzarella and basil for a classic Caprese salad.",
+        "Roast tomatoes with herbs and olive oil to create a flavorful sauce for pasta or pizza.",
+        "Stuff tomatoes with quinoa, vegetables, and cheese for a delicious and nutritious vegetarian meal."
+      ],
+      "Ground Beef": [
+        "Brown ground beef with onions and spices to make flavorful tacos or burritos.",
+        "Simmer ground beef with tomatoes, beans, and chili powder for a hearty and comforting chili.",
+        "Shape ground beef into juicy burgers and grill them to perfection, topping with your favorite cheese and condiments."
+      ],
+      "Bananas": [
+        "Blend bananas into smoothies or shakes for a naturally sweet and creamy treat.",
+        "Slice bananas and layer them with yogurt and granola for a delicious and satisfying parfait.",
+        "Mash bananas and use them as a substitute for eggs or butter in baking recipes for added moisture and sweetness."
+      ],
+      "Pasta": [
+        "Toss pasta with homemade pesto sauce, cherry tomatoes, and pine nuts for a simple yet flavorful meal.",
+        "Layer cooked pasta with marinara sauce and cheese to make a comforting baked pasta dish.",
+        "Stir-fry pasta with garlic, olive oil, and your favorite vegetables for a quick and easy weeknight dinner."
+      ],
+      "Yogurt": [
+        "Top yogurt with fresh berries, honey, and granola for a delicious and nutritious breakfast or snack.",
+        "Use yogurt as a marinade for chicken or lamb to tenderize the meat and add flavor.",
+        "Blend yogurt into salad dressings or dips for a creamy and tangy addition."
+      ],
+      "Potatoes": [
+        "Bake potatoes and top them with sour cream, cheese, and chives for a classic loaded potato dish.",
+        "Mash potatoes with butter and milk for creamy and fluffy mashed potatoes, perfect as a side dish.",
+        "Roast potatoes with rosemary and garlic for a crispy and flavorful side dish that pairs well with any meal."
+      ],
+      "Almond Milk": [
+        "Use almond milk as a dairy-free alternative in smoothies, cereal, or coffee for a creamy and delicious beverage.",
+        "Make vegan pancakes or waffles using almond milk as a substitute for cow's milk.",
+        "Blend almond milk with frozen fruits and greens to create nutrient-rich and refreshing smoothie bowls."
+      ],
+      "Chicken Breast": [
+        "Grill or bake chicken breast and serve it with steamed vegetables and quinoa for a healthy and balanced meal.",
+        "Slice chicken breast and toss it with mixed greens, avocado, and vinaigrette for a hearty and satisfying salad.",
+        "Sauté chicken breast with garlic, lemon, and capers for a quick and flavorful dinner option."
+      ],
+      "Rice": [
+        "Serve fluffy basmati rice alongside your favorite curry or stir-fry for a complete and satisfying meal.",
+        "Make a comforting bowl of rice pudding with cinnamon, raisins, and a splash of almond milk for a delicious dessert.",
+        "Stir-fry rice with vegetables, tofu, and soy sauce for a quick and flavorful vegetarian meal."
+      ],
+      "Broccoli": [
+        "Steam broccoli and toss it with lemon zest, olive oil, and Parmesan cheese for a simple and flavorful side dish.",
+        "Roast broccoli with garlic and chili flakes for a crispy and spicy appetizer or snack.",
+        "Add chopped broccoli to soups, casseroles, or stir-fries for an extra boost of nutrients and texture."
+      ],
+      "Lemon": [
+        "Squeeze lemon juice over grilled fish or chicken for a bright and citrusy flavor.",
+        "Zest lemon and add it to baked goods such as muffins, cakes, or cookies for a fragrant and flavorful twist.",
+        "Make homemade lemonade by mixing fresh lemon juice with water and sweetener to taste for a refreshing and thirst-quenching beverage."
+      ],
+      "Black Beans": [
+        "Make a hearty black bean soup with onions, garlic, tomatoes, and spices for a comforting and nutritious meal.",
+        "Add black beans to salads, wraps, or tacos for a protein-packed and filling dish.",
+        "Blend black beans into dips or spreads for a creamy and flavorful appetizer or snack."
+      ],
+      "Carrots": [
+        "Roast carrots with honey and thyme for a sweet and savory side dish that pairs well with roasted meats.",
+        "Grate carrots and toss them with raisins, nuts, and a tangy dressing for a refreshing carrot salad.",
+        "Blend carrots into a creamy soup with ginger and coconut milk for a comforting and nutritious meal."
+      ],
+      "Bell Peppers": [
+        "Slice bell peppers and serve them raw with hummus or your favorite dip for a crunchy and healthy snack.",
+        "Stuff bell peppers with quinoa, black beans, and cheese for a delicious and satisfying vegetarian meal.",
+        "Sauté bell peppers with onions and garlic as a colorful and flavorful topping for tacos or fajitas."
+      ],
+      "Onions": [
+        "Caramelize onions and serve them atop burgers, pizzas, or grilled cheese sandwiches for a sweet and savory flavor boost.",
+        "Pickle onions in vinegar, sugar, and spices for a tangy and crunchy condiment that pairs well with sandwiches or salads.",
+        "Dice onions and add them to soups, stews, or chili for added depth of flavor and aroma."
+      ],
+      "Lettuce": [
+        "Create a refreshing salad with lettuce, cucumber, tomatoes, and your favorite toppings, dressed with vinaigrette.",
+        "Use lettuce leaves as a crisp and fresh alternative to tortillas or bread for wraps and sandwiches.",
+        "Toss lettuce with grilled chicken, avocado, and corn for a southwestern-inspired salad with a creamy dressing."
+      ],
+      "Cucumber": [
+        "Slice cucumber and marinate it in vinegar, dill, and garlic for a quick and refreshing pickle.",
+        "Make cucumber sandwiches with cream cheese and dill for an elegant and light afternoon tea snack.",
+        "Blend cucumber with yogurt, garlic, and herbs to make a cool and refreshing tzatziki sauce, perfect for dipping or serving with grilled meats."
+      ],
+      "hi": [
+        "Hi there! How are you?",
+        "Hey! What's up?",
+        "Hello! How can I assist you today?"
+      ],
+      "hello": [
+        "Hello! How's your day going?",
+        "Hey! Nice to see you!",
+        "Hi there! What brings you here?"
+      ],
+      "how are you": [
+        "I'm doing well, thanks for asking! How about you?",
+        "I'm great, thanks for checking! How about yourself?",
+        "Feeling good! How can I help you today?"
+      ],
+      "good morning": [
+        "Good morning! Hope you have a wonderful day ahead!",
+        "Morning! How's everything going?",
+        "Hey there! Rise and shine!"
+      ],
+      "good afternoon": [
+        "Good afternoon! How's your day been so far?",
+        "Afternoon! How can I assist you?",
+        "Hey! Hope your day's going well!"
+      ],
+      "good evening": [
+        "Good evening! Ready to unwind?",
+        "Evening! How can I assist you?",
+        "Hey there! How was your day?"
+      ],
+      "good night": [
+        "Good night! Sweet dreams!",
+        "Nighty night! Sleep tight!",
+        "Take care and have a peaceful night!"
+      ],
+      "thank you": [
+        "You're welcome! Happy to help!",
+        "No problem! Let me know if you need anything else.",
+        "Glad I could assist you!"
+      ],
+      "you are welcome": [
+        "You're welcome! Anytime!",
+        "No worries! Happy to help!",
+        "Anytime! Let me know if there's anything else I can do for you."
+      ],
+      "help me": [
+        "How can I assist you today?",
+        "What can I do for you?",
+        "Let me know what you need help with."
+      ],
+      "default": [
+        "Sorry, I didn't catch that. Can you please rephrase?",
+        "I'm not sure I understand. Could you elaborate?",
+        "Hmm, I'm having trouble understanding. Can you try again?"
+      ],
+      "yes": [
+        "Great to hear!",
+        "That's fantastic!",
+        "Awesome!"
+      ],
+      "no": [
+        "Alright, no problem.",
+        "No worries!",
+        "Got it, thanks for letting me know."
+      ],
+      "sorry": [
+        "No need to apologize!",
+        "It's all good!",
+        "Don't worry about it."
+      ],
+      "help": [
+        "Sure, I'd be happy to help!",
+        "Of course, what do you need assistance with?",
+        "Absolutely, just let me know what you need!"
+      ],
+      "love": [
+        "That's wonderful!",
+        "Sounds like a great experience!",
+        "That's fantastic to hear!"
+      ],
+      "hate": [
+        "I'm sorry to hear that.",
+        "That's too bad.",
+        "I understand, everyone has their preferences."
+      ],
+      "excited": [
+        "That's awesome! I'm excited for you!",
+        "Sounds like something to look forward to!",
+        "I can feel your excitement! That's great!"
+      ],
+      "bored": [
+        "Sorry to hear that. Is there anything I can do to help?",
+        "Maybe I can suggest some activities to pass the time?",
+        "Let's see if we can find something fun to do!"
+      ],
+      "hungry": [
+        "I understand the feeling! What are you craving?",
+        "Time for a snack or a meal?",
+        "Hungry? Let's find something delicious to eat!"
+      ],
+      "thirsty": [
+        "Feeling thirsty? How about a refreshing drink?",
+        "Let's quench that thirst! What would you like to drink?",
+        "Thirsty? I can recommend some tasty beverages!"
+      ],
+      "tired": [
+        "Sounds like you need some rest. Take it easy!",
+        "Take a break and recharge!",
+        "Maybe a nap or some relaxation time would help."
+      ],
+      "happy": [
+        "I'm glad to hear that you're happy!",
+        "That's wonderful news!",
+        "Happy vibes all around!"
+      ],
+      "sad": [
+        "I'm sorry you're feeling down. Is there anything I can do to cheer you up?",
+        "It's okay to feel sad sometimes. I'm here to listen if you want to talk.",
+        "Sending you virtual hugs! Things will get better."
+      ],
+      "angry": [
+        "Take a deep breath. It's okay to feel frustrated.",
+        "I understand you're upset. Let's try to find a solution together.",
+        "Anger is a natural emotion. Let's work through it."
+      ],
+      "interesting": [
+        "That's fascinating!",
+        "Sounds intriguing!",
+        "I'm intrigued! Tell me more."
+      ],
+      "boring": [
+        "I see. What would you like to talk about instead?",
+        "Let's find something more engaging to discuss!",
+        "No worries, we can switch topics."
+      ],
+      "curious": [
+        "Curiosity is a great thing! What are you wondering about?",
+        "I love curiosity! What do you want to explore?",
+        "Let's satisfy that curiosity! What can I help you with?"
+      ],
+      "confused": [
+        "It's okay to feel confused. Can you clarify what you're unsure about?",
+        "Confusion happens sometimes. Let's work through it together.",
+        "No problem! Let's break it down step by step."
+      ],
+      "surprised": [
+        "Wow, that's unexpected!",
+        "What a surprise!",
+        "That's a pleasant surprise!"
+      ],
+      "disappointed": [
+        "I'm sorry to hear that. What happened?",
+        "Disappointments are tough. Let's talk about it.",
+        "I understand how you feel. Do you want to vent?"
+      ],
+      "excited_about": [
+        "That sounds exciting! Tell me more!",
+        "I can feel your excitement! What's got you so pumped?",
+        "I'm excited for you! What's happening?"
+      ],
+      "waiting": [
+        "Patience is key! Hang in there.",
+        "Waiting can be tough, but it'll be worth it!",
+        "I know waiting isn't fun, but good things come to those who wait."
+      ],
+      "thinking": [
+        "Take your time to think it through.",
+        "Deep thoughts? I'm here if you want to bounce ideas around.",
+        "Let me know when you're ready to share your thoughts."
+      ],
+      "laughing": [
+        "Laughter is the best medicine!",
+        "Glad I could bring a smile to your face!",
+        "Keep laughing! It's contagious!"
+      ],
+      "crying": [
+        "It's okay to cry. I'm here for you.",
+        "Let it out. I'm here to listen.",
+        "Sending virtual hugs your way. Everything will be okay."
+      ],
+      "pondering": [
+        "Deep in thought, huh? Take your time.",
+        "Pondering life's mysteries? I'm here if you need to talk.",
+        "Lost in thought? Let me know if you need a sounding board."
+      ],
+      "celebrating": [
+        "Congratulations! That's worth celebrating!",
+        "Cheers to your success!",
+        "Party time! Let's celebrate!"
+      ],
+      "Can you help me?": [ 
+        "Of course, what do you need assistance with?", 
+        "Absolutely, just let me know what you need!", 
+        "Sure thing, how can I assist you?" 
+      ],
+      "I need some assistance": [ 
+        "Sure, I'm here to help! What do you need?", 
+        "No problem, just let me know what you need assistance with.", 
+        "I'm here to assist you. What's the issue?" 
+      ],
+      "I'm stuck, can you assist?": [ 
+        "Sure, I'll do my best to help! What seems to be the problem?", 
+        "Absolutely, let's see what we can do to get you unstuck.", 
+        "I'm here to assist you. What's the issue?" 
+      ]
+    
+    }
+  }
