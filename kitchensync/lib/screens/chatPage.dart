@@ -73,38 +73,31 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   void _simulateBotTyping(String message) {
     int index = 0;
-
-    // Only proceed if the last message is not from the bot or if the bot was not already typing
-    if (messages.isEmpty || messages.last["sender"] != "bot" || !_isBotTyping) {
-      setState(() {
+    setState(() {
+      // Check if the bot is already typing; if not, add a new typing message
+      if (!_isBotTyping ||
+          messages.isEmpty ||
+          messages.last["sender"] != "bot") {
         messages.add({"sender": "bot", "data": ""});
-        _isBotTyping = true;
-      });
-    }
+      }
+      _isBotTyping = true;
+    });
 
     _typingTimer?.cancel();
     _typingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (index < message.length) {
         setState(() {
           _typingMessage =
-              message.substring(0, index + 1) + '|'; // Append cursor
+              '${message.substring(0, index + 1)}|'; // Append cursor
           // Ensure we update the last bot message, not add a new one
-          if (_isBotTyping &&
-              messages.isNotEmpty &&
-              messages.last["sender"] == "bot") {
-            messages.last["data"] = _typingMessage; // Update last message
-          }
+          messages.last["data"] = _typingMessage; // Update last message
         });
         index++;
       } else {
         // Once complete, remove cursor and cancel timer
         setState(() {
           _typingMessage = message; // Full message without cursor
-          if (_isBotTyping &&
-              messages.isNotEmpty &&
-              messages.last["sender"] == "bot") {
-            messages.last["data"] = _typingMessage; // Update last message
-          }
+          messages.last["data"] = _typingMessage; // Update last message
           _isBotTyping = false; // Typing done
         });
         timer.cancel();
@@ -124,25 +117,33 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _handleUserInput(String input) {
-    // Convert user input to lowercase for case-insensitive matching
-    final String lowerCaseInput = input.toLowerCase();
+    // Clear the text field after the message is sent
+    _controller.clear();
+
+    // Split the user input into words for case-insensitive matching
+    final List<String> inputWords = input.toLowerCase().split(' ');
 
     setState(() {
       messages.add({"sender": "user", "data": input});
     });
 
-    // Find a bot response using the lowercase input
-    final String botResponseKey = responses.keys.firstWhere(
-        (key) => key.toLowerCase() == lowerCaseInput,
-        orElse: () => "");
-
-    if (botResponseKey.isNotEmpty) {
-      final String botResponse = responses[botResponseKey]![
-          0]; // Get the first response for simplicity
-      _simulateBotTyping(botResponse);
-    } else {
-      _simulateBotTyping("I'm not sure how to respond to that.");
+    // Search for a bot response that contains any of the input words
+    String botResponse = "I'm not sure how to respond to that.";
+    for (String word in inputWords) {
+      for (String key in responses.keys) {
+        if (key.toLowerCase().contains(word)) {
+          botResponse =
+              responses[key]![0]; // Get the first response for simplicity
+          break;
+        }
+      }
+      if (botResponse != "I'm not sure how to respond to that.") {
+        // Found a response, no need to keep looking
+        break;
+      }
     }
+
+    _simulateBotTyping(botResponse);
   }
 
   @override
@@ -164,12 +165,15 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               controller: _scrollController,
               physics: BouncingScrollPhysics(),
               itemCount: messages.length +
-                  (_isBotTyping ? 1 : 0), // Add one for typing indicator
+                  (_isBotTyping ? 1 : 0), // Adjust for typing indicator
               itemBuilder: (context, index) {
-                // If bot is typing and we're at the last item, return TypingIndicator
                 if (_isBotTyping && index == messages.length) {
-                  return _buildChatBubble(
-                      "", false, true); // Pass true to isTyping
+                  // Return TypingIndicator here instead of a chat bubble
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child:
+                        TypingIndicator(), // Ensure this is styled to match your chat UI
+                  );
                 }
                 final message = messages[index];
                 final isUser = message["sender"] == "user";
