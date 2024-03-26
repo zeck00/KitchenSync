@@ -1,12 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters, file_names, no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
-import 'package:kitchensync/screens/customListItem.dart';
+import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'dart:ui' as ui;
+import 'package:url_launcher/url_launcher_string.dart';
 
 class DonateScreen extends StatelessWidget {
   const DonateScreen({super.key});
@@ -99,32 +100,35 @@ class DonateScreen extends StatelessWidget {
   }
 
   Widget _buildNearestFoodBanks() {
-    // Mock data, please replace with actual data
-    var nearestFoodBanks = [
-      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
-      {'name': 'Ziad Food Bank', 'location': 'Dubai, UAE'},
-      {'name': 'Ziad Food Bank', 'location': 'Dubai, UAE'},
-      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
-      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
-      {'name': 'UAE Food Bank', 'location': 'Dubai, UAE'},
-      // Add more banks as needed
-    ];
-
-    return SizedBox(
-      height: propHeight(55),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.hardEdge,
-        physics: BouncingScrollPhysics(),
-        itemCount: nearestFoodBanks.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _buildFoodBankCard(nearestFoodBanks[index]);
-        },
-      ),
+    return FutureBuilder<List<FoodBank>>(
+      future: FoodBank.loadNearestFoodBanks(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return Center(child: Text('No food banks found.'));
+        } else {
+          var nearestFoodBanks = snapshot.data!;
+          return SizedBox(
+            height: propHeight(55),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.hardEdge,
+              physics: BouncingScrollPhysics(),
+              itemCount: nearestFoodBanks.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildFoodBankCard(nearestFoodBanks[index]);
+              },
+            ),
+          );
+        }
+      },
     );
   }
 
-  Widget _buildFoodBankCard(Map<String, String> foodBank) {
+  Widget _buildFoodBankCard(FoodBank foodBank) {
     return Row(
       children: [
         Container(
@@ -134,21 +138,24 @@ class DonateScreen extends StatelessWidget {
           decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(propWidth(17))),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset('assets/images/Nav.png',
-                  width: propWidth(25), height: propHeight(25)),
-              SizedBox(width: propWidth(5)), // Space between icon and text
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(foodBank['name']!, style: AppFonts.locCard),
-                  Text(foodBank['location']!, style: AppFonts.locSub),
-                ],
-              )
-            ],
+          child: InkWell(
+            onTap: () => _launchURL(foodBank.link), // Open the link when tapped
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset('assets/images/Nav.png',
+                    width: propWidth(25), height: propHeight(25)),
+                SizedBox(width: propWidth(5)), // Space between icon and text
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(foodBank.name, style: AppFonts.locCard),
+                    Text(foodBank.location, style: AppFonts.locSub),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
         SizedBox(width: propWidth(10))
@@ -156,39 +163,49 @@ class DonateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDonationSchedule() {
-    // Mock data, please replace with actual data
-    var donationSchedule = [
-      {'date': '20th Mar, 2024', 'items': '5'},
-      {'date': '20th Mar, 2024', 'items': '7'},
-      {'date': '20th Mar, 2024', 'items': '3'},
-      {'date': '20th Mar, 2024', 'items': '2'},
-      {'date': '20th Mar, 2024', 'items': '1'},
-
-      // Add more schedules as needed
-    ];
-
-    return SizedBox(
-      width: double.infinity,
-      height: propHeight(280),
-      child: SingleChildScrollView(
-        child: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: donationSchedule.length,
-          itemBuilder: (BuildContext context, int index) {
-            return DonationTile(
-              date: donationSchedule[index]['date']!,
-              itemsCount: donationSchedule[index]['items']!,
-              onTap: () {
-                // Handle the tap event
-              },
-            );
-          },
-        ),
-      ),
-    );
+  void _launchURL(String url) async {
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
+}
+
+Widget _buildDonationSchedule() {
+  // Mock data, please replace with actual data
+  var donationSchedule = [
+    {'date': '20th Mar, 2024', 'items': '5'},
+    {'date': '24th Mar, 2024', 'items': '7'},
+    {'date': '15th Apr, 2024', 'items': '3'},
+    {'date': '16th May, 2024', 'items': '1'},
+    {'date': '20th Jun, 2024', 'items': '2'},
+    {'date': '30th Aug, 2024', 'items': '4'},
+
+    // Add more schedules as needed
+  ];
+
+  return SizedBox(
+    width: double.infinity,
+    height: propHeight(280),
+    child: SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: ListView.builder(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: donationSchedule.length,
+        itemBuilder: (BuildContext context, int index) {
+          return DonationTile(
+            date: donationSchedule[index]['date']!,
+            itemsCount: donationSchedule[index]['items']!,
+            onTap: () {
+              // Handle the tap event
+            },
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class DonationTile extends StatelessWidget {
@@ -267,14 +284,17 @@ class _PopupRoute extends PopupRoute {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => 'Select Kitchen';
+  String get barrierLabel => 'Confirm Action';
 
   @override
   Duration get transitionDuration => Duration(milliseconds: 250);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return BackdropFilter(
       filter: ui.ImageFilter.blur(
         sigmaX: 12.0,
@@ -291,16 +311,27 @@ class _PopupRoute extends PopupRoute {
                 children: <Widget>[
                   Center(
                       child: Text(
-                    "Choose Your Kitchen",
-                    style: AppFonts.choose1,
+                    "Confirm Scheduling?",
+                    style: AppFonts.welcomemsg2,
                   )),
                   SizedBox(height: propHeight(25)),
-                  CustomListItem(
-                      mainTxt: 'mainTxt',
-                      numberTxt: 'numberTxt',
-                      subTxt: 'subTxt',
-                      imagePath: 'assets/images/Egg.png',
-                      height: 100)
+                  InkWell(
+                    onTap: () => _showCustomOverlay(context),
+                    child: Container(
+                      width: propWidth(50),
+                      height: propHeight(50),
+                      decoration: BoxDecoration(
+                        color: AppColors.green,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Confirm',
+                          style: AppFonts.appname,
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -309,4 +340,51 @@ class _PopupRoute extends PopupRoute {
       ),
     );
   }
+}
+
+void _showCustomOverlay(BuildContext context) {
+  OverlayEntry overlayEntry = _createOverlayEntry(context);
+  Overlay.of(context).insert(overlayEntry);
+
+  // Wait for 2 seconds and remove the overlay
+  Future.delayed(Duration(milliseconds: 1250))
+      .then((_) => overlayEntry.remove());
+  Future.delayed(Duration(milliseconds: 1000))
+      .then((_) => Navigator.of(context).pop());
+}
+
+OverlayEntry _createOverlayEntry(BuildContext context) {
+  return OverlayEntry(
+    builder: (context) => Positioned(
+      top: MediaQuery.of(context).size.height * 0.45,
+      left: MediaQuery.of(context).size.width * 0.055,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          alignment: Alignment.center,
+          width: MediaQuery.of(context).size.width * 0.90,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.light,
+                child: Icon(Icons.check, size: 50, color: AppColors.primary),
+              ),
+              SizedBox(height: propHeight(10)),
+              Text(
+                'Added To Schedule',
+                style: AppFonts.locCard,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

@@ -110,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: propHeight(15),
             ),
             SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               child: Row(

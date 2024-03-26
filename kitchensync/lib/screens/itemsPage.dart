@@ -41,10 +41,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
   }
 
   Future<void> _loadCategoriesAndItems() async {
-    final allItems = await Item.loadAllItems('assets/data/items.json');
-    final loadedCategories =
-        await Category.loadCategories('assets/data/categories.json');
-
+    final allItems = await Item.loadAllItems('items.json');
+    final loadedCategories = await Category.loadCategories('categories.json');
+    allItems.forEach((item) {
+      print("Item: ${item.itemName}, Category: ${item.category}");
+      bool categoryExists =
+          loadedCategories.any((cat) => cat.categoryName == item.category);
+      if (!categoryExists) {
+        print(
+            "Warning: No category found for item: ${item.itemName}, Category: ${item.category}");
+      }
+    });
     for (var category in loadedCategories) {
       category.assignItems(allItems);
     }
@@ -102,6 +109,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
             Expanded(
               child: ListView.builder(
+                physics: BouncingScrollPhysics(),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
@@ -176,12 +184,9 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               ),
               SizedBox(width: propWidth(13)),
               Text(
-                getUnitForCategory(
-                    category.categoryName,
-                    category
-                        .getTotalQuantity()), // Adjusted to use the custom unit function
-                style: AppFonts.numbers,
-              ),
+                  getUnitForCategory(
+                      category.categoryName, category.getTotalQuantity()),
+                  style: AppFonts.numbers),
               Spacer(), // Use Spacer for automatically calculated remaining space
               GestureDetector(
                   child: Image.asset(
@@ -386,8 +391,7 @@ void _showItemDetailsPopup(BuildContext context, Item item) {
                   ),
                   Expanded(
                     flex: 2,
-                    child:
-                        Text(item.nfcTagID ?? 'N/A', style: AppFonts.numbers1),
+                    child: Text(item.nfcTagID, style: AppFonts.numbers1),
                   ),
                 ],
               ),
@@ -440,7 +444,6 @@ void _showItemDetailsPopup(BuildContext context, Item item) {
                   ),
                 ],
               ),
-              // ... any other details
             ],
           ),
           actions: <Widget>[

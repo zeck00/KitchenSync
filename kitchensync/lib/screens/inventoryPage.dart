@@ -1,6 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters, library_private_types_in_public_api, avoid_print, file_names
-
-import 'dart:ui';
+// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
@@ -11,14 +9,13 @@ import 'package:kitchensync/screens/itemsPage.dart';
 import '../backend/dataret.dart';
 
 class InventoryScreen extends StatefulWidget {
-  const InventoryScreen({Key? key}) : super(key: key);
+  const InventoryScreen({super.key});
 
   @override
   _InventoryScreenState createState() => _InventoryScreenState();
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  bool _isLoading = true;
   List<Kitchen> kitchens = []; // To store kitchen data
   List<Device> devices = []; // To store device data
   List<Category> categories = []; // To store category data
@@ -27,51 +24,45 @@ class _InventoryScreenState extends State<InventoryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData().then((_) {
+      setState(() {
+        // Update the state to reflect the loaded data
+      });
+    });
   }
 
   Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate data loading
-    await Future.delayed(Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    kitchens = await Kitchen.fetchKitchens('assets/data/kitchens.json');
-    for (var kitchen in kitchens) {
-      await kitchen.loadDevices();
-    }
-
-    // Load categories and items
-    categories = await Category.loadCategories('assets/data/categories.json');
-    List<Item> items = await Item.loadAllItems('assets/data/items.json');
-    // Assign items to their categories
-    for (var category in categories) {
-      category.assignItems(items);
+    try {
+      kitchens = await Kitchen.fetchKitchens('kitchens.json');
+      for (var kitchen in kitchens) {
+        await kitchen.loadDevices();
+        for (var device in kitchen.devices) {
+          device.categories =
+              await device.loadCategories(device.categoriesFile);
+        }
+      }
+      categories = await Category.loadCategories('categories.json');
+      final itemsLoaded = await Item.loadAllItems('items.json');
+      for (var category in categories) {
+        category.assignItems(itemsLoaded);
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
   void simulatePageUpdate() async {
-    setState(() => _isLoading = true);
     await Future.delayed(Duration(milliseconds: 1500));
-    // Here, you might want to actually reload your data
+    _reloadData();
     // For demonstration, we're just toggling the loading state
-    setState(() => _isLoading = false);
-    print("Data Reloaded");
   }
 
   Future<void> _reloadData() async {
-    setState(() => _isLoading = true); // Show loading indicator
+// Show loading indicator
     await _loadData();
     await Future.delayed(
         Duration(milliseconds: 1500)); // Re-fetch the data + added wait time
-    setState(() => _isLoading = false); // Hide loading indicator
-    print("Data Reloaded");
+// Hide loading indicator
   }
 
   @override
@@ -79,50 +70,39 @@ class _InventoryScreenState extends State<InventoryScreen> {
     initSizeConfig(context);
     return Scaffold(
       appBar: CustomAppBar(),
-      body: Stack(
-        children: [
-          // If _isLoading is true, show the loading indicator
-          if (_isLoading)
-            Center(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Container(
-                  alignment: Alignment.center,
-                  color: AppColors.light,
-                  // Semi-transparent overlay
-                  child: CircularProgressIndicator(
-                    color: AppColors.dark,
-                    strokeWidth: 6,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.dark),
-                    strokeCap: StrokeCap.round,
-                    semanticsLabel: 'Loading',
-                  ),
-                ),
-              ),
-            ),
-          // Else, show the main content
-          if (!_isLoading) _buildKitchenPageView(),
-        ],
+      body: FutureBuilder(
+        future: _loadData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error Contacting Server'),
+            );
+          }
+          return _buildKitchenPageView();
+        },
       ),
     );
   }
 
   Widget _buildKitchenPageView() {
+    if (kitchens.isEmpty || kitchens.first.devices.isEmpty) {
+      return Center(child: Text("No devices available"));
+    }
+
     return PageView.builder(
-      physics: BouncingScrollPhysics(),
-      controller: _pageController,
-      onPageChanged: (int page) {
-        setState(() {});
-      },
-      itemCount: kitchens.first.devices
-          .length, // Assuming you want to display devices of the first kitchen
+      controller: _pageController, // Ensure the controller is used
+      physics: BouncingScrollPhysics(), // This enables the swipe effect
+      itemCount: kitchens.first.devices.length, // Confirm this is > 1
       itemBuilder: (context, index) {
         final device = kitchens.first.devices[index];
         return buildPage(
-          device
-              .deviceName, // deviceState is not available in your current model
           device.deviceName,
-          'assets/images/001.png', // Adjust imagePath based on your assets or device data
+          device.deviceName,
+          'assets/images/${device.imagePath}',
           device.deviceID,
         );
       },
@@ -163,7 +143,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                   onTap: () {
                     simulatePageUpdate();
-                    _reloadData();
+
                     // Trigger loading overlay and delay
                   },
                 ),
@@ -264,6 +244,42 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 }
+
+// class UnitInfo {
+//   final String unit;
+//   final double conversionFactor; // Useful for unit conversion if needed
+
+//   UnitInfo({required this.unit, this.conversionFactor = 1.0});
+// }
+
+// class CategoryUnits {
+//   static final Map<String, UnitInfo> _categoryToUnit = {
+//     'Dairy': UnitInfo(unit: 'mL'),
+//     'Poultry': UnitInfo(unit: 'g'),
+//     'Produce': UnitInfo(unit: 'g'),
+//     'Eggs': UnitInfo(unit: 'Pcs'),
+//     'SeaFood': UnitInfo(unit: 'g'),
+//     'Meat': UnitInfo(unit: 'g'),
+//     'Pantry': UnitInfo(unit: 'g'),
+//     // Add more categories as needed
+//   };
+
+//   static String getUnitForCategory(String categoryName, double quantity) {
+//     final unitInfo = _categoryToUnit[categoryName];
+//     if (unitInfo != null) {
+//       return '$quantity ${unitInfo.unit}';
+//     } else {
+//       // Implement logic for determining a default unit, if desired
+//       // For example, check if quantity suggests a liquid or solid, etc.
+//       return '$quantity Units'; // A generic fallback
+//     }
+//   }
+
+//   // Example method for adding a new category and its unit dynamically
+//   static void addCategoryUnit(String category, UnitInfo unitInfo) {
+//     _categoryToUnit[category] = unitInfo;
+//   }
+// }
 
 String getUnitForCategory(String categoryName, double quantity) {
   switch (categoryName) {

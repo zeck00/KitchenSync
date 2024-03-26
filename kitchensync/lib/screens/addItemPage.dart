@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables, unused_element
 
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
@@ -7,6 +9,7 @@ import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -37,13 +40,21 @@ class _AddItemPageState extends State<AddItemPage> {
   final TextEditingController _unitController = TextEditingController();
 
   String generateItemId() {
-    // Using DateTime to generate a unique ID for simplicity.
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   void createItem() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      String categoryName = categories
+          .firstWhere((category) => category.categoryID == selectedCategory,
+              orElse: () => Category(
+                  categoryID: '',
+                  categoryName: 'Diary',
+                  catIcon:
+                      'assets/images/Milk.png') // Provide a default or handle the case where the category is not found
+              )
+          .categoryName;
 
       // Create a new item using the controllers
       newItem = Item(
@@ -59,36 +70,12 @@ class _AddItemPageState extends State<AddItemPage> {
         inDate: DateFormat('yyyy-MM-dd').format(selectedInDate),
         itemInfo: _itemInfoController.text,
         status: selectedStatus ?? '',
-        category: selectedCategory ?? '',
+        category: categoryName,
         quantity: int.tryParse(_quantityController.text) ?? 0,
         unit: selectedUnit ?? '',
       );
 
-      addItemToSelectedDevice(newItem!);
-
-      // Show a success message or take other appropriate action
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     behavior: SnackBarBehavior.fixed,
-      //     content: Row(
-      //       children: [
-      //         Icon(Icons.check_circle,
-      //             color: AppColors.light), // Your custom icon
-      //         // Spacing between icon and text
-      //         Expanded(
-      //           child: Text(
-      //             'Item added successfully',
-      //             style: TextStyle(color: AppColors.light),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //     backgroundColor: AppColors.primary,
-      //     shape: RoundedRectangleBorder(
-      //       borderRadius: BorderRadius.circular(17),
-      //     ),
-      //   ),
-      // );
+      addNewItem(newItem!);
 
       _showCustomOverlay(
           context, newItem!.itemName); // Pass the item name dynamically
@@ -108,13 +95,52 @@ class _AddItemPageState extends State<AddItemPage> {
     Future.delayed(Duration(seconds: 3)).then((value) => overlayEntry.remove());
   }
 
-  void addItemToSelectedDevice(Item item) {
-    // Add your logic to add the item to the selected device's list
-    // Update the JSON file with the new list of items
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/items.json');
+  }
+
+  Future<void> addNewItem(Item newItem) async {
+    final File file = await _localFile;
+
+    List<Item> items = [];
+    if (await file.exists()) {
+      try {
+        String contents = await file.readAsString();
+        // Directly decode the JSON string to a List
+        final List<dynamic> jsonList = json.decode(contents);
+
+        // Parse the existing items and add them to the list.
+        items = jsonList
+            .map((itemJson) => Item.fromJson(itemJson as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        print("Error reading or parsing existing items.json: $e");
+      }
+    } else {
+      print("items.json does not exist. A new file will be created.");
+    }
+
+    // Append the new item to the list.
+    items.add(newItem);
+
+    // Write the updated list back to the file.
+    try {
+      await file.writeAsString(
+          json.encode(items.map((item) => item.toJson()).toList()));
+      print("Item added successfully: ${newItem.itemName}");
+    } catch (e) {
+      print("Error writing the updated items.json: $e");
+    }
   }
 
   void clearFormFields() {
-    // Clear the controllers for the next item entry
+    // Clear the text fields
     _itemNameController.clear();
     _nfcTagIdController.clear();
     _pDateController.clear();
@@ -125,11 +151,16 @@ class _AddItemPageState extends State<AddItemPage> {
     _quantityController.clear();
     _unitController.clear();
 
-    // Reset dropdown values
+    // Reset any selected dropdown values
     setState(() {
-      selectedCategory = null;
-      selectedDevice = null;
       selectedKitchen = null;
+      selectedDevice = null;
+      selectedCategory = null;
+      selectedStatus = null;
+      selectedUnit = null;
+      selectedPDate = null;
+      selectedXDate = null;
+      selectedInDate = DateTime.now();
     });
   }
 
@@ -151,45 +182,24 @@ class _AddItemPageState extends State<AddItemPage> {
   @override
   void initState() {
     super.initState();
-    fetchInitialData();
+    loadInitialData();
   }
 
-  Future<void> fetchInitialData() async {
-    try {
-      kitchens = await Kitchen.fetchKitchens('assets/data/kitchens.json');
-      if (kitchens.isNotEmpty) {
-        // Select the first kitchen by default
-        selectedKitchen = kitchens.first.kitchenID;
-        await loadDevicesForKitchen(selectedKitchen!);
-      }
-    } catch (e) {
-      // Handle errors, perhaps log them or show a message to the user
-      print('Error loading initial data: $e');
-    }
-  }
-
-  Future<void> loadDevicesForKitchen(String kitchenId) async {
-    var kitchen = kitchens.firstWhere((k) => k.kitchenID == kitchenId);
-    if (kitchen != null) {
-      devices = await kitchen.loadDevices();
+  void loadInitialData() async {
+    kitchens = await Kitchen.fetchKitchens('kitchens.json');
+    if (kitchens.isNotEmpty) {
+      selectedKitchen = kitchens.first.kitchenID;
+      devices = await kitchens.first.loadDevices();
       if (devices.isNotEmpty) {
-        // Select the first device by default
         selectedDevice = devices.first.deviceID;
-        await loadCategoriesForDevice(selectedDevice!);
+        categories =
+            await devices.first.loadCategories(devices.first.categoriesFile);
+        if (categories.isNotEmpty) {
+          selectedCategory = categories.first.categoryID;
+        }
       }
     }
-  }
-
-  Future<void> loadCategoriesForDevice(String deviceId) async {
-    var device = devices.firstWhere((d) => d.deviceID == deviceId);
-    if (device != null) {
-      categories =
-          await device.loadCategories('assets/data/${device.categoriesFile}');
-      if (categories.isNotEmpty) {
-        // Select the first category by default
-        selectedCategory = categories.first.categoryID;
-      }
-    }
+    setState(() {});
   }
 
   DateTime? selectedPDate;
@@ -268,6 +278,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _itemNameController,
                   decoration: InputDecoration(
                     labelText: 'Item Name',
                     fillColor: AppColors.light,
@@ -291,6 +302,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 buildCategoryDropdown(),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _nfcTagIdController,
                   decoration: InputDecoration(
                     labelText: 'NFC Tag ID',
                     fillColor: AppColors.light,
@@ -373,6 +385,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _itemInfoController,
                   decoration: InputDecoration(
                     labelText: 'Item Info',
                     fillColor: AppColors.light,
@@ -414,6 +427,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
                 SizedBox(height: propHeight(10)),
                 TextFormField(
+                  controller: _quantityController,
                   decoration: InputDecoration(
                     labelText: 'Quantity',
                     border: OutlineInputBorder(
@@ -472,12 +486,24 @@ class _AddItemPageState extends State<AddItemPage> {
   Widget buildKitchenDropdown() {
     return DropdownButtonFormField<String>(
       value: selectedKitchen,
-      onSaved: (newValue) => selectedKitchen = newValue!,
-      onChanged: (newValue) {
-        setState(() {
-          selectedKitchen = newValue!;
-          // TODO: Load devices based on selected kitchen
-        });
+      onChanged: (value) async {
+        if (value != null) {
+          selectedKitchen = value;
+          var kitchen = kitchens.firstWhere((k) => k.kitchenID == value);
+          devices = await kitchen.loadDevices();
+          selectedDevice = devices.isNotEmpty ? devices.first.deviceID : null;
+          categories = selectedDevice != null
+              ? await devices.first.loadCategories(devices.first.categoriesFile)
+              : [];
+          selectedCategory =
+              categories.isNotEmpty ? categories.first.categoryID : null;
+        } else {
+          devices = [];
+          categories = [];
+          selectedDevice = null;
+          selectedCategory = null;
+        }
+        setState(() {});
       },
       items: kitchens.map<DropdownMenuItem<String>>((Kitchen kitchen) {
         return DropdownMenuItem<String>(
@@ -487,43 +513,29 @@ class _AddItemPageState extends State<AddItemPage> {
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Kitchen',
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(propHeight(17)),
-          borderSide: BorderSide(color: AppColors.primary),
+          borderRadius: BorderRadius.circular(8),
         ),
-        filled: true,
-        fillColor: AppColors.light,
       ),
     );
   }
-
-  // TODO: Add methods to build Device and Category dropdowns, and fields for Item details
 
   // Build a Dropdown button for devices
   Widget buildDeviceDropdown() {
     return DropdownButtonFormField<String>(
       value: selectedDevice,
-      onSaved: (newValue) => selectedDevice = newValue!,
-      onChanged: (newValue) async {
-        setState(() {
-          selectedDevice = newValue!;
-          categories = []; // Clear categories when device changes
-        });
-        // Find the selected device
-        var selectedDeviceObj = devices.firstWhere(
-          (device) => device.deviceID == selectedDevice,
-          orElse: () =>
-              Device(deviceID: '', deviceName: '', categoriesFile: ''),
-        );
-        await selectedDeviceObj
-            .loadCategories('assets/data/${selectedDeviceObj.categoriesFile}');
-        setState(() {
-          categories = selectedDeviceObj.categories;
+      onChanged: (value) async {
+        if (value != null) {
+          selectedDevice = value;
+          var device = devices.firstWhere((d) => d.deviceID == value);
+          categories = await device.loadCategories(device.categoriesFile);
           selectedCategory =
               categories.isNotEmpty ? categories.first.categoryID : null;
-        });
+        } else {
+          categories = [];
+          selectedCategory = null;
+        }
+        setState(() {});
       },
       items: devices.map<DropdownMenuItem<String>>((Device device) {
         return DropdownMenuItem<String>(
@@ -533,14 +545,9 @@ class _AddItemPageState extends State<AddItemPage> {
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Device',
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(propHeight(17)),
-          borderSide: BorderSide(color: AppColors.primary),
+          borderRadius: BorderRadius.circular(8),
         ),
-        filled: true,
-        fillColor: AppColors.light,
       ),
     );
   }
@@ -548,32 +555,59 @@ class _AddItemPageState extends State<AddItemPage> {
   // Build a Dropdown button for categories
   Widget buildCategoryDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedCategory,
-      onSaved: (newValue) => selectedCategory = newValue!,
-      onChanged: (newValue) {
+      value: selectedCategory, // This should be the category ID
+      onChanged: (String? newValue) {
         setState(() {
-          selectedCategory = newValue!;
+          selectedCategory = newValue; // newValue is the category ID
         });
       },
       items: categories.map<DropdownMenuItem<String>>((Category category) {
         return DropdownMenuItem<String>(
-          value: category.categoryID,
-          child: Text(category.categoryName),
+          value: category.categoryID, // Keep using categoryID as the value
+          child:
+              Text(category.categoryName), // Display categoryName to the user
         );
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Category',
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: propWidth(20), vertical: propHeight(15)),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(propHeight(17)),
-          borderSide: BorderSide(color: AppColors.primary),
+          borderRadius: BorderRadius.circular(8),
         ),
-        filled: true,
-        fillColor: AppColors.light,
+        // Display a hint text if no categories are available yet
+        hintText: categories.isEmpty ? 'Please select a device first' : null,
       ),
+      // Disable the dropdown if no categories are loaded yet
+      disabledHint: Text('No categories available'),
+      // Enable dropdown only if categories are available
     );
   }
+
+  // return DropdownButtonFormField<String>(
+  //   value: selectedCategory,
+  //   onSaved: (newValue) => selectedCategory = newValue!,
+  //   onChanged: (newValue) {
+  //     setState(() {
+  //       selectedCategory = newValue!;
+  //     });
+  //   },
+  //   items: categories.map<DropdownMenuItem<String>>((Category category) {
+  //     return DropdownMenuItem<String>(
+  //       value: category.categoryID,
+  //       child: Text(category.categoryName),
+  //     );
+  //   }).toList(),
+  //   decoration: InputDecoration(
+  //     labelText: 'Select Category',
+  //     contentPadding: EdgeInsets.symmetric(
+  //         horizontal: propWidth(20), vertical: propHeight(15)),
+  //     border: OutlineInputBorder(
+  //       borderRadius: BorderRadius.circular(propHeight(17)),
+  //       borderSide: BorderSide(color: AppColors.primary),
+  //     ),
+  //     filled: true,
+  //     fillColor: AppColors.light,
+  //   ),
+  // );
 }
 
 OverlayEntry _createOverlayEntry(BuildContext context, String itemName) {

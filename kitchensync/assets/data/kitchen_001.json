@@ -5,7 +5,8 @@
     {
       "deviceID": "001",
       "deviceName": "Refrigerator",
-      "categoriesFile": "categories.json"
+      "categoriesFile": "categories.json",
+      "imagePath": "001.png"
     },
     {
       "deviceID": "002",

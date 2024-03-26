@@ -41,13 +41,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadItems() async {
-    final String itemsString =
-        await rootBundle.loadString('assets/data/items.json');
-    final Map<String, dynamic> itemsJson = json.decode(itemsString);
+    final String itemsString = await rootBundle.loadString('items.json');
+    final List<dynamic> itemsJson = json.decode(itemsString);
     setState(() {
-      itemsList = (itemsJson['items'] as List)
-          .map((itemJson) => Item.fromJson(itemJson))
-          .toList();
+      itemsList = itemsJson.map((itemJson) => Item.fromJson(itemJson)).toList();
     });
   }
 

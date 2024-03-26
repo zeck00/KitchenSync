@@ -5,7 +5,7 @@ import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/customDeviceCard.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'size_config.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -21,6 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: CustomAppBar(),
       body: ListView(
+        physics: BouncingScrollPhysics(),
         children: [
           Padding(
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
@@ -49,9 +50,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildManageDevicesSection(),
           // Account, Privacy, and About sections
           SizedBox(height: propHeight(35)),
-          _buildListItem('Manage Your Account'),
-          _buildListItem('Manage Your Privacy'),
-          _buildListItem('About KitchenSync'),
+          _buildListItem('Manage Your Account', null),
+          _buildListItem('Manage Your Privacy', null),
+          _buildListItem(
+            'About KitchenSync',
+            () async {
+              final Uri uri =
+                  Uri.parse('https://saifalfalahi.github.io/hikitchensync/#');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch';
+              }
+            },
+          ),
           // The "We Listen" section with communication options
           _buildCommunicationOptionsSection(),
         ],
@@ -87,6 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 30.0),
           child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -97,8 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: CustomDeviceCard(
                     title: '${device['name']} - ${device['count']}',
                     itemCount: device['count']!,
-                    imagePath:
-                        device['imagePath']!, // Replace with actual image path
+                    imagePath: device['imagePath']!,
                   ),
                 );
               }).toList(),
@@ -135,33 +147,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 //     ],
 //   ),
 
-Widget _buildListItem(String title) {
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 30.0),
-    child: Column(
-      children: [
-        Row(
-          children: [
-            Text(title, style: AppFonts.servicename),
-            Expanded(child: Container()),
-            Image.asset(
-              'assets/images/Next.png',
-              color: AppColors.dark,
-              width: propWidth(32),
-              height: propHeight(32),
-            ),
-          ],
-        ),
-        SizedBox(height: 10),
-        Container(
-          width: double.infinity,
-          height: 2,
-          decoration: BoxDecoration(
-              color: AppColors.grey2,
-              borderRadius: BorderRadius.all(Radius.circular(10))),
-        ),
-        SizedBox(height: 5),
-      ],
+Widget _buildListItem(String title, onTap) {
+  return InkWell(
+    onTap: onTap,
+    highlightColor: AppColors.light.withAlpha(255),
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 30.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(title, style: AppFonts.servicename),
+              Expanded(child: Container()),
+              Image.asset(
+                'assets/images/Next.png',
+                color: AppColors.dark,
+                width: propWidth(32),
+                height: propHeight(32),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+                color: AppColors.grey2,
+                borderRadius: BorderRadius.all(Radius.circular(10))),
+          ),
+          SizedBox(height: 5),
+        ],
+      ),
     ),
   );
 }
@@ -181,128 +197,209 @@ Widget _buildCommunicationOptionsSection() {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: propWidth(175),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/Ring.png',
-                  width: propWidth(30),
-                  height: propHeight(18),
-                ),
-                SizedBox(width: propWidth(10)),
-                Text(
-                  'Call Us',
-                  style: AppFonts.locCard,
-                )
-              ],
+          InkWell(
+            onTap: () async {
+              final Uri uri = Uri.parse('tel:+971547151059');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(175),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/Ring.png',
+                    width: propWidth(30),
+                    height: propHeight(18),
+                  ),
+                  SizedBox(width: propWidth(10)),
+                  Text(
+                    'Call Us',
+                    style: AppFonts.locCard,
+                  )
+                ],
+              ),
             ),
           ),
           SizedBox(width: 5),
-          Container(
-            width: propWidth(175),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/At.png',
-                  width: propWidth(18),
-                  height: propHeight(18),
-                ),
-                SizedBox(width: propWidth(10)),
-                Text(
-                  'Write To Us',
-                  style: AppFonts.locCard,
-                )
-              ],
+          InkWell(
+            onTap: () async {
+              final Uri email = Uri.parse('mailto:hikitchensync@gmail.com');
+              if (await canLaunchUrl(email)) {
+                await launchUrl(email);
+              } else {
+                throw 'Could not launch $email';
+              }
+            },
+            child: Container(
+              width: propWidth(175),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/At.png',
+                    width: propWidth(18),
+                    height: propHeight(18),
+                  ),
+                  SizedBox(width: propWidth(10)),
+                  Text(
+                    'Write To Us',
+                    style: AppFonts.locCard,
+                  )
+                ],
+              ),
             ),
-          )
+          ),
         ],
       ),
       SizedBox(height: propHeight(10)),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/X.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri = Uri.parse('https://www.x.com/');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/X.png',
+                width: propWidth(21),
+              ),
             ),
           ),
           SizedBox(width: propWidth(5)),
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/LinkedIn.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri = Uri.parse('https://www.linkedin.com/');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/LinkedIn.png',
+                width: propWidth(21),
+              ),
             ),
           ),
           SizedBox(width: propWidth(5)),
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/Snapchat.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri = Uri.parse('https://www.snapchat.com/');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/Snapchat.png',
+                width: propWidth(21),
+              ),
             ),
           ),
           SizedBox(width: propWidth(5)),
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/YouTube.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri = Uri.parse('https://www.youtube.com/');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/YouTube.png',
+                width: propWidth(21),
+              ),
             ),
           ),
           SizedBox(width: propWidth(5)),
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/Facebook.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri = Uri.parse('https://www.facebook.com/');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/Facebook.png',
+                width: propWidth(21),
+              ),
             ),
           ),
           SizedBox(width: propWidth(5)),
-          Container(
-            width: propWidth(55),
-            height: propHeight(40),
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            child: Image.asset(
-              'assets/images/Instagram.png',
-              width: propWidth(21),
+          GestureDetector(
+            onTap: () async {
+              final Uri uri =
+                  Uri.parse('https://www.instagram.com/hikitchensync');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              } else {
+                throw 'Could not launch $uri';
+              }
+            },
+            child: Container(
+              width: propWidth(55),
+              height: propHeight(40),
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Image.asset(
+                'assets/images/Instagram.png',
+                width: propWidth(21),
+              ),
             ),
-          ),
+          )
         ],
       ),
     ],

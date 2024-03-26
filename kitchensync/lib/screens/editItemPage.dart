@@ -212,8 +212,8 @@ class _EditItemPageState extends State<EditItemPage> {
   Future<void> loadDevicesForKitchen(String kitchenId) async {
     var kitchen = kitchens.firstWhere((k) => k.kitchenID == kitchenId);
     if (kitchen != null) {
-      devices = await kitchen.loadDevices();
-      if (devices.isNotEmpty) {
+      await kitchen.loadDevices();
+      if (kitchen.devices.isNotEmpty) {
         // Select the first device by default
         selectedDevice = devices.first.deviceID;
         await loadCategoriesForDevice(selectedDevice!);

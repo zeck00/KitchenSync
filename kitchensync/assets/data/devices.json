@@ -7,24 +7,28 @@
     {
       "deviceID": "001",
       "deviceName": "Refrigerator",
-      "categoriesFile": "categories.json"
+      "categoriesFile": "categories.json",
+      "imagePath": "001.png"
     },
 
     {
       "deviceID": "002",
       "deviceName": "Cabinet",
-      "categoriesFile": "categories_002.json"
+      "categoriesFile": "categories_002.json",
+      "imagePath": "002.png"
     },
 
     {
       "deviceID": "003",
       "deviceName": "Cabinet",
-      "categoriesFile": "categories.json"
+      "categoriesFile": "categories.json",
+      "imagePath": "001.png"
     },
     {
       "deviceID": "004",
       "deviceName": "Smart bin",
-      "categoriesFile": "categories.json"
+      "categoriesFile": "categories.json",
+      "imagePath": "001.png"
     }
   ]
 }

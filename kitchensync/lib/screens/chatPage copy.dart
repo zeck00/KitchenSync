@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers
+// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers, sized_box_for_whitespace
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -256,6 +256,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 }
 
 class TypingIndicator extends StatelessWidget {
+  const TypingIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

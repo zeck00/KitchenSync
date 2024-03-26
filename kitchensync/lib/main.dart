@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/size_config.dart';
@@ -12,6 +13,10 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+
+final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+const platform = MethodChannel('com.example.kitchensync/alarm_permission');
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -20,6 +25,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
+  await initializeAppData();
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -36,9 +42,6 @@ void main() async {
   // Initialize the plugin
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    // onSelectNotification: (String? payload) async {
-    //   // Handle notification tapped logic here
-    // },
   );
 
   // Create a channel for Android (Android 8.0+)
@@ -58,7 +61,111 @@ void main() async {
         ?.createNotificationChannel(channel);
   }
 
-  runApp(MyApp());
+  if (Platform.isAndroid) {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final sdkInt = androidInfo.version.sdkInt;
+    if (sdkInt >= 31) {
+      // Android 12 and above
+      final bool? isPermissionGranted =
+          await platform.invokeMethod('checkExactAlarmPermission');
+      if (isPermissionGranted == false) {
+        final bool? result =
+            await platform.invokeMethod('requestExactAlarmPermission');
+        if (result != null && result) {
+          print('Exact alarm permission request successful');
+        } else {
+          print('Exact alarm permission request failed or denied');
+        }
+      } else {
+        print('Exact alarm permission is already granted or not necessary.');
+      }
+    }
+  }
+
+  runApp(Bootstrap());
+}
+
+class Bootstrap extends StatelessWidget {
+  const Bootstrap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            initializeApp(context);
+            return Center(child: CircularProgressIndicator());
+          },
+        ),
+      ),
+    );
+  }
+
+  void initializeApp(BuildContext context) async {
+    tz.initializeTimeZones();
+    await requestPermissions(context);
+    runApp(MyApp());
+  }
+}
+
+Future<void> initializeAppData() async {
+  try {
+    // Add other file names as necessary
+    await getLocalFile('items.json');
+    await getLocalFile('kitchens.json');
+    await getLocalFile('categories.json');
+    await getLocalFile('responses.json');
+    await getLocalFile('devices.json');
+    await getLocalFile('kitchen_001.json');
+    await getLocalFile('categories_002.json');
+    await getLocalFile('kitchen_002.json');
+    await getLocalFile('nearest_food_banks.json');
+  } catch (e) {
+    print("Failed to initialize app data: $e");
+  }
+}
+
+Future<void> requestPermissions(BuildContext context) async {
+  await requestStoragePermission(context);
+}
+
+Future<void> requestStoragePermission(BuildContext context) async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    if (await Permission.storage.shouldShowRequestRationale) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text("Storage Permission Required"),
+          content: Text(
+              "This app requires storage access to function properly. Please allow this permission in the next prompt."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Deny"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text("Allow"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _requestPermission(Permission.storage);
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      _requestPermission(Permission.storage);
+    }
+  }
+}
+
+Future<void> _requestPermission(Permission permission) async {
+  final status = await permission.request();
+  if (status.isPermanentlyDenied) {
+    openAppSettings();
+  }
 }
 
 Future<void> scheduleNotification(
@@ -108,7 +215,7 @@ Future<void> scheduleNotification(
 
 Future<void> _loadItemsAndScheduleNotifications(BuildContext context) async {
   try {
-    final items = await Item.loadAllItems('assets/data/items.json');
+    final items = await Item.loadAllItems('items.json');
     for (var item in items) {
       await item.scheduleExpirationNotifications();
     }

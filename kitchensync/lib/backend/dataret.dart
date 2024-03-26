@@ -1,51 +1,81 @@
-// ignore_for_file: unused_import, unnecessary_this
+// ignore_for_file: unused_import, unnecessary_this, prefer_const_constructors
 
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:kitchensync/main.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 
-Future<dynamic> loadJsonFromAssets(String path) async {
-  final jsonString = await rootBundle.loadString(path);
-  return jsonDecode(jsonString);
+// This function will get the file from the local directory if it exists,
+// otherwise it will copy it from the assets into the local directory.
+Future<File> getLocalFile(String filename) async {
+  final directory = await getApplicationDocumentsDirectory();
+  final path = directory.path;
+  final file = File('$path/$filename');
+
+  if (!await file.exists()) {
+    final data = await rootBundle.loadString('assets/data/$filename');
+    await file.writeAsString(data);
+  }
+  return file;
+}
+
+Future<dynamic> loadJson(String filename) async {
+  try {
+    final file = await getLocalFile(filename);
+    final jsonString = await file.readAsString();
+    print('Loaded $filename');
+    return jsonDecode(jsonString);
+  } catch (e) {
+    print('Error loading $filename: $e');
+    rethrow; // Re-throw the error after logging it.
+  }
 }
 
 class Kitchen {
+  final String kitchenID;
+  final String kitchenName;
+  String devicesPath;
+  List<Device> devices = [];
+
   Kitchen({
     required this.kitchenID,
     required this.kitchenName,
     required this.devicesPath,
   });
 
-  final String kitchenID;
-  final String kitchenName;
-  String devicesPath;
-  List<Device> devices = []; // Initialize the devices list.
-
-  // Adjusted to load Kitchen object(s) along with their devices
-  static Future<List<Kitchen>> fetchKitchens(String assetPath) async {
-    final data = await loadJsonFromAssets(assetPath);
-    return (data as List)
-        .map((kitchenData) => Kitchen.fromJson(kitchenData))
-        .toList();
-  }
-
   factory Kitchen.fromJson(Map<String, dynamic> json) {
     return Kitchen(
-      kitchenID: json['kitchenID'],
-      kitchenName: json['kitchenName'],
-      devicesPath:
-          json['devicesPath'], // Make sure this key matches your JSON file.
+      kitchenID: json['kitchenID'] as String? ?? 'defaultID',
+      kitchenName: json['kitchenName'] as String? ?? 'defaultName',
+      devicesPath: json['devicesPath'] as String? ?? 'defaultPath',
     );
   }
 
+  // Call this method after initializing a Kitchen object to load its devices.
   Future<List<Device>> loadDevices() async {
-    final devicesJson = await loadJsonFromAssets('assets/data/$devicesPath');
-    devices = (devicesJson['devices'] as List)
+    final deviceData = await loadJson(devicesPath);
+    devices = (deviceData['devices'] as List)
         .map((deviceJson) => Device.fromJson(deviceJson))
         .toList();
     return devices;
+  }
+
+  static Future<List<Kitchen>> fetchKitchens(String assetPath) async {
+    final data = await loadJson(assetPath);
+    List<Kitchen> kitchens = (data as List)
+        .map((kitchenData) => Kitchen.fromJson(kitchenData))
+        .toList();
+
+    // Load devices for each kitchen
+    for (var kitchen in kitchens) {
+      await kitchen.loadDevices();
+    }
+    return kitchens;
   }
 }
 
@@ -54,38 +84,46 @@ class Device {
     required this.deviceID,
     required this.deviceName,
     required this.categoriesFile,
+    required this.imagePath,
   });
 
   String deviceID;
   String deviceName;
   String categoriesFile;
+  String imagePath;
 
   factory Device.fromJson(Map<String, dynamic> json) {
     return Device(
-      deviceID: json['deviceID'],
-      deviceName: json['deviceName'],
-      categoriesFile: json['categoriesFile'],
-    );
+        deviceID: json['deviceID'] ?? '',
+        deviceName: json['deviceName'] ?? '',
+        categoriesFile: json['categoriesFile'] ?? '',
+        imagePath: json['imagePath'] ?? '001.png');
   }
 
-  Future<Device> loadDev(String devName) async {
-    final String response =
-        await rootBundle.loadString('assets/data/$devName' '.json');
-    final data = await json.decode(response);
-    return Device.fromJson(data);
+  Future<Device> loadDevice(String devName) async {
+    final deviceJson = await loadJson('$devName.json');
+    return Device.fromJson(deviceJson);
   }
 
   List<Category> categories = [];
 
-  Future<List<Category>> loadCategories(String categoriesFilePath) async {
-    final categoriesJson = await loadJsonFromAssets(categoriesFilePath);
-    // Here, categoriesJson is expected to be a Map, not a List directly.
-    // So, we first access the 'categories' key to get the List.
-    List<dynamic> categoriesList = categoriesJson['categories'];
-    categories = categoriesList
-        .map((categoryData) => Category.fromJson(categoryData))
-        .toList();
-    return categories;
+  Future<List<Category>> loadCategories(String filePath) async {
+    try {
+      final categoriesJson = await loadJson(filePath);
+      if (categoriesJson != null && categoriesJson['categories'] is List) {
+        List<dynamic> categoriesList = categoriesJson['categories'];
+        List<Category> categories = categoriesList
+            .map((categoryData) => Category.fromJson(categoryData))
+            .toList();
+        return categories;
+      } else {
+        print('Categories list not found or invalid in $filePath.');
+        return []; // Return an empty list to handle this gracefully.
+      }
+    } catch (e) {
+      print('Error loading categories from $filePath: $e');
+      return []; // Return an empty list on error.
+    }
   }
 }
 
@@ -118,26 +156,28 @@ class Category {
         itemsList; // Use the cascade operator to assign `items` if it's not empty.
   }
 
-  Future<Category> loadCat(String catName) async {
-    final String response =
-        await rootBundle.loadString('assets/data/categories.json');
-    final data = await json.decode(response);
-    return Category.fromJson(data);
-  }
+  // Assign the items from a master list of items based on the category
 
-  // Assign the items from a master list of items based on the category.
+  // This method filters `allItems` and assigns matching items to `items`.
   void assignItems(List<Item> allItems) {
-    items = allItems.where((item) => item.category == categoryName).toList();
+    items = allItems
+        .where((item) =>
+            item.category.trim().toLowerCase() ==
+            categoryName.trim().toLowerCase())
+        .toList();
+    print('Items for category $categoryName: ${items.length}');
   }
 
-  // Calculate the total quantity of items in this category.
   double getTotalQuantity() {
-    return items.fold(0.0, (total, item) => total + item.quantity);
+    double total =
+        items.fold(0.0, (previousValue, item) => previousValue + item.quantity);
+    print('Total quantity for $categoryName: $total');
+    return total;
   }
 
   static Future<List<Category>> loadCategories(
       String categoriesFilePath) async {
-    final categoriesJson = await loadJsonFromAssets(categoriesFilePath);
+    final categoriesJson = await loadJson(categoriesFilePath);
     // This now correctly checks for the 'categories' key and casts the value to List
     List<dynamic> categoriesList = categoriesJson['categories'] as List;
     return categoriesList
@@ -147,11 +187,34 @@ class Category {
   }
 }
 
+class FoodBank {
+  final String name;
+  final String location;
+  final String link;
+
+  FoodBank({required this.name, required this.location, required this.link});
+
+  factory FoodBank.fromJson(Map<String, dynamic> json) {
+    return FoodBank(
+      name: json['name'] as String,
+      location: json['location'] as String,
+      link: json['link'] as String,
+    );
+  }
+
+  static Future<List<FoodBank>> loadNearestFoodBanks() async {
+    final jsonString =
+        await rootBundle.loadString('assets/data/nearest_food_banks.json');
+    final jsonResponse = json.decode(jsonString) as List<dynamic>;
+    return jsonResponse.map((data) => FoodBank.fromJson(data)).toList();
+  }
+}
+
 class Item {
   Item({
     required this.itemID,
     required this.itemName,
-    this.nfcTagID,
+    required this.nfcTagID,
     required this.pDate,
     required this.xDate,
     required this.inDate,
@@ -164,7 +227,7 @@ class Item {
 
   String itemID;
   String itemName;
-  String? nfcTagID;
+  String nfcTagID;
   String pDate;
   String xDate;
   String inDate;
@@ -176,24 +239,47 @@ class Item {
 
   factory Item.fromJson(Map<String, dynamic> data) {
     return Item(
-      itemID: data['itemID'],
-      itemName: data['itemName'],
-      nfcTagID: data['nfcTagID'],
-      pDate: data['pDate'],
-      xDate: data['xDate'],
-      inDate: data['inDate'],
-      itemInfo: data['itemInfo'],
-      status: data['status'],
-      category: data['category'],
-      quantity: data['quantity'],
-      unit: data['unit'],
+      itemID: data['itemID'] ?? 'UnknownID',
+      itemName: data['itemName'] ?? 'Unknown Name',
+      nfcTagID: data['nfcTagID'] ?? 'Unknown NFC Tag ID',
+      pDate: data['pDate'] ?? '',
+      xDate: data['xDate'] ?? '',
+      inDate: data['inDate'] ?? '',
+      itemInfo: data['itemInfo'] ?? '',
+      status: data['status'] ?? 'Unknown Status',
+      category: data['category'] ?? 'Unknown Category',
+      quantity: data['quantity'] ?? 0,
+      unit: data['unit'] ?? 'Unknown Unit',
     );
   }
+
+  static DateTime _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) {
+      // Handle the case where dateStr is null or empty
+      return DateTime.now(); // or some other default date
+    }
+    try {
+      return DateFormat('yyyy-MM-dd').parse(dateStr);
+    } catch (e) {
+      // Handle the case where parsing fails
+      return DateTime.now(); // or some other default date
+    }
+  }
+
+// Method to save updated item details
   Map<String, dynamic> toJson() => {
         'itemID': itemID,
         'itemName': itemName,
-        // ... all the fields of the item
+        'pDate': pDate.isNotEmpty ? pDate : null,
+        'xDate': xDate.isNotEmpty ? xDate : null,
+        'inDate': inDate.isNotEmpty ? inDate : null,
+        'itemInfo': itemInfo.isNotEmpty ? itemInfo : null,
+        'status': status.isNotEmpty ? status : null,
+        'category': category.isNotEmpty ? category : null,
+        'quantity': quantity != 0 ? quantity : 1, // Changed here
+        'unit': unit.isNotEmpty ? unit : null,
       };
+
   Item copyWith({
     String? itemName,
     String? nfcTagID,
@@ -222,16 +308,49 @@ class Item {
   }
 
   DateTime get exDate {
-    return DateTime.parse(xDate);
+    return _parseDate(this.xDate);
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/items.json');
+  }
+
+  Future<File> ensureLocalFile() async {
+    final file = await _localFile;
+
+    if (!await file.exists()) {
+      // Assuming 'items.json' is in your assets directory
+      final data = await rootBundle.loadString('assets/items.json');
+      await file.writeAsString(data, flush: true);
+    }
+
+    return file;
   }
 
   static Future<List<Item>> loadAllItems(String itemsFilePath) async {
-    final itemsJson = await loadJsonFromAssets(itemsFilePath);
-    // This now correctly checks for the 'items' key and casts the value to List
-    List<dynamic> itemsList = itemsJson['items'] as List;
-    return itemsList
-        .map((itemData) => Item.fromJson(itemData as Map<String, dynamic>))
-        .toList();
+    try {
+      final file = await getLocalFile(itemsFilePath);
+      final jsonString = await file.readAsString();
+      final jsonMap = json.decode(jsonString);
+
+      // Assuming the JSON structure starts with a Map, and contains a List<dynamic> under the "items" key
+      if (jsonMap is Map<String, dynamic> && jsonMap.containsKey('items')) {
+        final List<dynamic> jsonItems = jsonMap['items'];
+        return jsonItems.map((itemJson) => Item.fromJson(itemJson)).toList();
+      } else {
+        // If the JSON doesn't contain the "items" key, or isn't structured as expected, return an empty list
+        return [];
+      }
+    } catch (e) {
+      print('Error loading items from $itemsFilePath: $e');
+      return []; // Return an empty list on error.
+    }
   }
 
   Future<void> scheduleExpirationNotifications() async {
