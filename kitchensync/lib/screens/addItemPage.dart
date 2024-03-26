@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
+import 'package:kitchensync/screens/OCRPage.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -269,6 +270,23 @@ class _AddItemPageState extends State<AddItemPage> {
                       child: Text('ADD'),
                     ),
                     SizedBox(width: propWidth(10)),
+                    ElevatedButton(
+                      style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(0),
+                          shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(17.0)))),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OCRPage(),
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.receipt_long_rounded),
+                    ),
+                    SizedBox(width: propWidth(10)),
                   ],
                 ),
                 SizedBox(height: propHeight(10)),
@@ -508,8 +526,11 @@ class _AddItemPageState extends State<AddItemPage> {
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Kitchen',
+        fillColor: AppColors.light,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            propHeight(17),
+          ),
         ),
       ),
     );
@@ -540,8 +561,11 @@ class _AddItemPageState extends State<AddItemPage> {
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Device',
+        fillColor: AppColors.light,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            propHeight(17),
+          ),
         ),
       ),
     );
@@ -565,8 +589,11 @@ class _AddItemPageState extends State<AddItemPage> {
       }).toList(),
       decoration: InputDecoration(
         labelText: 'Select Category',
+        fillColor: AppColors.light,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            propHeight(17),
+          ),
         ),
         // Display a hint text if no categories are available yet
         hintText: categories.isEmpty ? 'Please select a device first' : null,

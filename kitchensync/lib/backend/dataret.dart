@@ -1,4 +1,4 @@
-// ignore_for_file: unused_import, unnecessary_this, prefer_const_constructors
+// ignore_for_file: unused_import, unnecessary_this, prefer_const_constructors, avoid_print
 
 import 'dart:convert';
 import 'package:flutter/services.dart';

@@ -1,6 +1,7 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field, unused_element
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field, unused_element, avoid_function_literals_in_foreach_calls, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/OCRItemPage.dart';
 import 'package:kitchensync/screens/addItemPage.dart';
 import 'package:kitchensync/screens/chatPage.dart';
 import 'package:kitchensync/screens/customListItem.dart';
@@ -112,10 +113,30 @@ class _ItemsScreenState extends State<ItemsScreen> {
                         MaterialPageRoute(builder: (context) => AddItemPage()),
                       );
                     },
-                    child: Icon(
-                      Icons.add_circle_rounded,
-                      color: AppColors.dark,
-                      size: propWidth(30),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.add_circle_rounded,
+                          color: AppColors.dark,
+                          size: propWidth(30),
+                        ),
+                        SizedBox(width: propHeight(10)),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OCRItemPage(),
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            Icons.receipt_long_rounded,
+                            color: AppColors.dark,
+                            size: propWidth(30),
+                          ),
+                        ),
+                      ],
                     )),
               ],
             ),
