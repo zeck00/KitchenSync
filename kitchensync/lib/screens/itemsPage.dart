@@ -52,6 +52,19 @@ class _ItemsScreenState extends State<ItemsScreen> {
             "Warning: No category found for item: ${item.itemName}, Category: ${item.category}");
       }
     });
+
+    // Right after loading all items and categories, before attempting to assign:
+    print("Verifying loaded items' categories against known categories...");
+    allItems.forEach((item) {
+      print("Item: ${item.itemName}, Category: ${item.category}");
+      bool categoryExists =
+          loadedCategories.any((cat) => cat.categoryName == item.category);
+      if (!categoryExists) {
+        print(
+            "Warning: No category found for item: ${item.itemName}, Category: ${item.category}");
+      }
+    });
+
     for (var category in loadedCategories) {
       category.assignItems(allItems);
     }

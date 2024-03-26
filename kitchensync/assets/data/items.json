@@ -1,4 +1,5 @@
-[
+{
+  "items": [
       {
         "itemID": "0001",
         "itemName": "Milk",
@@ -376,4 +377,5 @@
       "quantity": 1,
       "unit": "Piece"
     }
-      ]
+  ]
+}

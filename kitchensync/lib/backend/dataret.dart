@@ -160,6 +160,7 @@ class Category {
 
   // This method filters `allItems` and assigns matching items to `items`.
   void assignItems(List<Item> allItems) {
+    print('Total items loaded: ${allItems.length}');
     items = allItems
         .where((item) =>
             item.category.trim().toLowerCase() ==

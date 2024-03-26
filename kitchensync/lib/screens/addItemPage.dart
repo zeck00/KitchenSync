@@ -10,6 +10,7 @@ import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:kitchensync/screens/inventoryPage.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key});
@@ -106,36 +107,30 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   Future<void> addNewItem(Item newItem) async {
-    final File file = await _localFile;
+    final file = await _localFile;
 
-    List<Item> items = [];
-    if (await file.exists()) {
-      try {
-        String contents = await file.readAsString();
-        // Directly decode the JSON string to a List
-        final List<dynamic> jsonList = json.decode(contents);
-
-        // Parse the existing items and add them to the list.
-        items = jsonList
-            .map((itemJson) => Item.fromJson(itemJson as Map<String, dynamic>))
-            .toList();
-      } catch (e) {
-        print("Error reading or parsing existing items.json: $e");
-      }
-    } else {
-      print("items.json does not exist. A new file will be created.");
-    }
-
-    // Append the new item to the list.
-    items.add(newItem);
-
-    // Write the updated list back to the file.
     try {
-      await file.writeAsString(
-          json.encode(items.map((item) => item.toJson()).toList()));
+      List<dynamic> itemsList = [];
+      // Check if the file exists and has content
+      if (await file.exists() && await file.readAsString() != '') {
+        final contents = await file.readAsString();
+        final decoded = json.decode(contents);
+        if (decoded is Map<String, dynamic> && decoded.containsKey('items')) {
+          itemsList = decoded['items'];
+        }
+      }
+
+      // Add the new item to the items list
+      itemsList.add(newItem.toJson());
+
+      // Prepare the data in the expected structure
+      final Map<String, dynamic> updatedData = {"items": itemsList};
+
+      // Write the updated data back to the file
+      await file.writeAsString(json.encode(updatedData));
       print("Item added successfully: ${newItem.itemName}");
     } catch (e) {
-      print("Error writing the updated items.json: $e");
+      print("Error updating items.json: $e");
     }
   }
 
