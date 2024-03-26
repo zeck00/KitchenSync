@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
-import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/screens/itemsPage.dart';
 import 'dart:convert';
 import 'dart:io';

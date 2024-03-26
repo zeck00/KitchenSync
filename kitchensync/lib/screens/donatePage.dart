@@ -5,7 +5,7 @@ import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/appBar.dart';
-import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'dart:ui' as ui;
 import 'package:url_launcher/url_launcher_string.dart';
 

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
-import 'size_config.dart';
+import '../styles/size_config.dart';
 
 class CustomDeviceCard extends StatelessWidget {
   final String title;

@@ -13,7 +13,7 @@ import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart'; // Make sure the file name is correct and lowercase
-import 'size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'dart:ui' as ui;
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {

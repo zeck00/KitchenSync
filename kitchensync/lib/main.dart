@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
-import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'backend/dataret.dart';
 import 'styles/AppColors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

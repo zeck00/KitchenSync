@@ -5,7 +5,7 @@ import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 
-import 'size_config.dart';
+import '../styles/size_config.dart';
 
 class ErrorScreen extends StatefulWidget {
   const ErrorScreen({super.key});

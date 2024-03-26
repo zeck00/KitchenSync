@@ -6,7 +6,7 @@ import 'package:kitchensync/screens/customDeviceCard.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'size_config.dart';
+import '../styles/size_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

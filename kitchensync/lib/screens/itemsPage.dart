@@ -7,7 +7,7 @@ import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/screens/editItemPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
-import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'dart:ui' as ui;
 import '../backend/dataret.dart';
 import 'inventoryPage.dart';

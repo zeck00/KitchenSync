@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/screens/appBar.dart';
-import 'package:kitchensync/screens/size_config.dart';
+import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:path_provider/path_provider.dart';
