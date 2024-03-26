@@ -1,5 +1,5 @@
 // Import statements remain the same
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, file_names, library_private_types_in_public_api, unused_field, avoid_print
 
 import 'dart:convert';
 import 'dart:io';
@@ -9,14 +9,13 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/screens/appBar.dart';
-import 'package:kitchensync/screens/itemsPage.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:path_provider/path_provider.dart';
 
 class OCRItemPage extends StatefulWidget {
-  const OCRItemPage({Key? key}) : super(key: key);
+  const OCRItemPage({super.key});
 
   @override
   _OCRItemPageState createState() => _OCRItemPageState();
@@ -41,7 +40,7 @@ class _OCRItemPageState extends State<OCRItemPage> {
   String? selectedCategory;
   Item? newItem;
 
-  List<String> _units = [
+  final List<String> _units = [
     'Milliliters',
     'Liters',
     'Grams',
