@@ -1,5 +1,5 @@
 // Import statements remain the same
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, file_names, library_private_types_in_public_api, unused_field, avoid_print
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, file_names, library_private_types_in_public_api, unused_field, avoid_print, no_leading_underscores_for_local_identifiers
 
 import 'dart:convert';
 import 'dart:io';
@@ -12,6 +12,7 @@ import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
+import 'package:flutter_pro_barcode_scanner/flutter_pro_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 
 class OCRItemPage extends StatefulWidget {
@@ -102,6 +103,15 @@ class _OCRItemPageState extends State<OCRItemPage> {
 
       _showCustomOverlay(context, newItem!.itemName);
     }
+  }
+
+  void scanBarcode(TextEditingController _itemName) async {
+    String scannedCode = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const ScannerScreen()));
+
+    setState(() {
+      _itemName.text = scannedCode;
+    });
   }
 
   void clearFormFields() {
@@ -277,17 +287,27 @@ class _OCRItemPageState extends State<OCRItemPage> {
                   controller: _itemNameController,
                   decoration: InputDecoration(
                     labelText: 'Item Name',
-                    suffixIcon: IconButton(
-                      icon:
-                          Icon(Icons.camera_alt_rounded, color: AppColors.dark),
-                      onPressed: () =>
-                          pickImageAndRecognizeText(_itemNameController),
+                    suffixIcon: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween, // added line
+                      mainAxisSize: MainAxisSize.min, // added line
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(Icons.camera_alt_rounded,
+                              color: AppColors.dark),
+                          onPressed: () =>
+                              pickImageAndRecognizeText(_itemNameController),
+                        ),
+                        IconButton(
+                          icon:
+                              Icon(Icons.barcode_reader, color: AppColors.dark),
+                          onPressed: () => scanBarcode(_itemNameController),
+                        ),
+                      ],
                     ),
                     fillColor: AppColors.light,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        propHeight(17),
-                      ),
+                      borderRadius: BorderRadius.circular(propHeight(17)),
                     ),
                   ),
                 ),

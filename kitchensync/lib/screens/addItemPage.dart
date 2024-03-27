@@ -10,6 +10,7 @@ import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:kitchensync/screens/inventoryPage.dart';
 
@@ -172,6 +173,7 @@ class _AddItemPageState extends State<AddItemPage> {
     _statusController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
+    NfcManager.instance.stopSession();
     super.dispose();
   }
 
@@ -179,6 +181,91 @@ class _AddItemPageState extends State<AddItemPage> {
   void initState() {
     super.initState();
     loadInitialData();
+  }
+
+  OverlayEntry? _overlayEntry;
+
+  void _showNfcReadOverlay() {
+    _overlayEntry = _createNfcOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  OverlayEntry _createNfcOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 2 - 50,
+        left: MediaQuery.of(context).size.width / 2 - 50,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CircularProgressIndicator(
+                    strokeWidth: 5,
+                    color: AppColors.green,
+                    strokeCap: StrokeCap.round,
+                  ),
+                  SizedBox(height: 16),
+                  Text("Reading NFC...", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void startNFCSession() async {
+    bool isAvailable = await NfcManager.instance.isAvailable();
+    if (!isAvailable) {
+      // Handle NFC not available
+      return;
+    }
+
+    _showNfcReadOverlay(); // Show the overlay
+
+    NfcManager.instance.startSession(
+      onDiscovered: (NfcTag tag) async {
+        final ndef = Ndef.from(tag);
+        if (ndef?.cachedMessage == null) return;
+        for (final record in ndef!.cachedMessage!.records) {
+          String recordData = String.fromCharCodes(record.payload);
+          String jsonPayload = recordData.substring(3);
+          Map<String, dynamic> data = json.decode(jsonPayload);
+          print('NFC Record Data: $recordData');
+
+          setState(() {
+            _itemNameController.text = data['itemName'] ?? '';
+            _nfcTagIdController.text = data['nfcTagId'] ?? '';
+            _pDateController.text = data['pDate'] ?? '';
+            _xDateController.text = data['xDate'] ?? '';
+            _inDateController.text = data['inDate'] ?? '';
+            _itemInfoController.text = data['itemInfo'] ?? '';
+            _statusController.text = data['status'] ?? '';
+            _quantityController.text = data['quantity'].toString();
+            _unitController.text = data['unit'] ?? '';
+            // Set dropdown values if necessary
+            // selectedKitchen = data['kitchen'];
+            // selectedDevice = data['device'];
+            selectedCategory = data['category'];
+          });
+        }
+
+        NfcManager.instance.stopSession();
+        // Dismiss the overlay
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      },
+    );
   }
 
   void loadInitialData() async {
@@ -271,20 +358,12 @@ class _AddItemPageState extends State<AddItemPage> {
                     ),
                     SizedBox(width: propWidth(10)),
                     ElevatedButton(
-                      style: ButtonStyle(
-                          elevation: MaterialStateProperty.all(0),
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(17.0)))),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OCRPage(),
-                          ),
-                        );
-                      },
-                      child: Icon(Icons.receipt_long_rounded),
+                      onPressed: startNFCSession,
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(10),
+                      ),
+                      child: Icon(Icons.nfc_rounded),
                     ),
                     SizedBox(width: propWidth(10)),
                   ],
