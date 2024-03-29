@@ -41,11 +41,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadItems() async {
-    final String itemsString = await rootBundle.loadString('items.json');
-    final List<dynamic> itemsJson = json.decode(itemsString);
-    setState(() {
-      itemsList = itemsJson.map((itemJson) => Item.fromJson(itemJson)).toList();
-    });
+    try {
+      // Assuming loadAllItems returns a List<Item>
+      final loadedItems = await Item.loadAllItems('items.json');
+      setState(() {
+        itemsList = loadedItems;
+      });
+    } catch (e) {
+      print("Failed to load items: $e");
+      // Handle the error or show a message to the user
+    }
   }
 
   Future<void> _loadResponses() async {
@@ -192,7 +197,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Widget _itemSelectionDropdown() {
-    // Returns a dropdown button for item selection
+    if (itemsList.isEmpty) {
+      // Show a loading indicator or a message until items are loaded
+      return Center(child: CircularProgressIndicator());
+    }
+    // Dropdown is enabled with items in the list
     return DropdownButtonFormField<String>(
       value: selectedItem,
       onChanged: (newValue) {
@@ -201,7 +210,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           _handleUserInput(selectedItem!);
         });
       },
-      items: itemsList.map<DropdownMenuItem<String>>((Item item) {
+      items: itemsList.map((Item item) {
         return DropdownMenuItem<String>(
           value: item.itemName,
           child: Text(item.itemName),
