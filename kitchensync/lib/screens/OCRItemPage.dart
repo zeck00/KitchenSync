@@ -8,12 +8,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
+import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:flutter_pro_barcode_scanner/flutter_pro_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class OCRItemPage extends StatefulWidget {
   const OCRItemPage({super.key});
@@ -105,13 +107,93 @@ class _OCRItemPageState extends State<OCRItemPage> {
     }
   }
 
+  void showCustomMessageOverlay(BuildContext context, String message,
+      IconData icon, Color backgroundColor) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height * 0.5,
+        left: MediaQuery.of(context).size.width * 0.25,
+        width: MediaQuery.of(context).size.width * 0.5,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.light,
+                  child: Icon(icon, size: 50, color: AppColors.primary),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3)).then((value) => overlayEntry.remove());
+  }
+
+  Future<void> fetchProductDetails(String barcode) async {
+    final String url =
+        'https://world.openfoodfacts.org/api/v0/product/$barcode.json';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final productData = json.decode(response.body);
+        if (productData['status'] == 1) {
+          // Product found
+          final product = productData['product'];
+          setState(() {
+            _itemNameController.text =
+                product['product_name'] ?? 'Unknown Product';
+            _itemInfoController.text =
+                product['ingredients_text'] ?? 'No ingredients information';
+            // Add more fields as needed
+          });
+        } else {
+          showCustomMessageOverlay(
+              context, "Product not found", Icons.error, Colors.red);
+          print('Product not found');
+        }
+      } else {
+        showCustomMessageOverlay(context, "Failed to fetch product details.",
+            Icons.cloud_off, Colors.red);
+        print('Failed to fetch product details.');
+      }
+    } catch (e) {
+      print('Error fetching product details: $e');
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => ErrorScreen()));
+    }
+  }
+
   void scanBarcode(TextEditingController _itemName) async {
     String scannedCode = await Navigator.push(context,
         MaterialPageRoute(builder: (context) => const ScannerScreen()));
 
-    setState(() {
-      _itemName.text = scannedCode;
-    });
+    if (scannedCode.isNotEmpty) {
+      fetchProductDetails(scannedCode);
+    }
   }
 
   void clearFormFields() {

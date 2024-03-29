@@ -26,52 +26,55 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     initSizeConfig(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        SizedBox(
-          height: propHeight(28),
-        ),
-        Text(
-          'KitchenSync',
-          style: AppFonts.appname,
-          textAlign: TextAlign.center,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: propWidth(27)),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MainLayout()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: propWidth(21.1),
-                  backgroundImage: AssetImage('assets/images/logo.png'),
+    return SingleChildScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            height: propHeight(28),
+          ),
+          Text(
+            'KitchenSync',
+            style: AppFonts.appname,
+            textAlign: TextAlign.center,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(left: propWidth(27)),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MainLayout()),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: propWidth(21.1),
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
                 ),
               ),
-            ),
-            GestureDetector(
-              onTap: () => _showPopup(context),
-              child: Padding(
-                padding: EdgeInsets.only(right: propWidth(27)),
-                child: CircleAvatar(
-                    radius: propWidth(21.1),
-                    backgroundColor: AppColors.primary,
-                    child: Image.asset(
-                      'assets/images/person.png',
-                      height: propHeight(50),
-                      width: propWidth(50),
-                    )),
+              GestureDetector(
+                onTap: () => _showPopup(context),
+                child: Padding(
+                  padding: EdgeInsets.only(right: propWidth(27)),
+                  child: CircleAvatar(
+                      radius: propWidth(21.1),
+                      backgroundColor: AppColors.primary,
+                      child: Image.asset(
+                        'assets/images/person.png',
+                        height: propHeight(50),
+                        width: propWidth(50),
+                      )),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
