@@ -28,11 +28,9 @@ Future<dynamic> loadJson(String filename) async {
   try {
     final file = await getLocalFile(filename);
     final jsonString = await file.readAsString();
-    print('Loaded $filename');
     return jsonDecode(jsonString);
   } catch (e) {
-    print('Error loading $filename: $e');
-    rethrow; // Re-throw the error after logging it.
+    rethrow;
   }
 }
 
@@ -58,7 +56,8 @@ class Kitchen {
 
   // Call this method after initializing a Kitchen object to load its devices.
   Future<List<Device>> loadDevices() async {
-    final deviceData = await loadJson(devicesPath);
+    final deviceData = await loadJson(
+        devicesPath); // This loads the kitchen JSON which includes devices.
     devices = (deviceData['devices'] as List)
         .map((deviceJson) => Device.fromJson(deviceJson))
         .toList();
@@ -93,16 +92,13 @@ class Device {
   String imagePath;
 
   factory Device.fromJson(Map<String, dynamic> json) {
+    print(
+        'Creating Device from JSON: $json'); // Debug print the JSON being parsed
     return Device(
         deviceID: json['deviceID'] ?? '',
         deviceName: json['deviceName'] ?? '',
         categoriesFile: json['categoriesFile'] ?? '',
-        imagePath: json['imagePath'] ?? '001.png');
-  }
-
-  Future<Device> loadDevice(String devName) async {
-    final deviceJson = await loadJson('$devName.json');
-    return Device.fromJson(deviceJson);
+        imagePath: json['imagePath'] ?? '');
   }
 
   List<Category> categories = [];
@@ -160,19 +156,17 @@ class Category {
 
   // This method filters `allItems` and assigns matching items to `items`.
   void assignItems(List<Item> allItems) {
-    print('Total items loaded: ${allItems.length}');
     items = allItems
         .where((item) =>
             item.category.trim().toLowerCase() ==
             categoryName.trim().toLowerCase())
         .toList();
-    print('Items for category $categoryName: ${items.length}');
   }
 
   double getTotalQuantity() {
     double total =
         items.fold(0.0, (previousValue, item) => previousValue + item.quantity);
-    print('Total quantity for $categoryName: $total');
+
     return total;
   }
 

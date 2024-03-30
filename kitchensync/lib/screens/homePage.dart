@@ -6,25 +6,59 @@ import 'package:kitchensync/screens/customDeviceCard.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import '../styles/size_config.dart';
+import '../backend/dataret.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key}); // Use Key? key instead of super.key
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Kitchen> kitchens = []; // Define kitchens here within the state
   bool isDarkMode = false;
   ThemeMode _themeMode = ThemeMode.system; // Default theme
+
+  Future<Kitchen>? _kitchenFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Here you should provide the actual asset path to your kitchens JSON file
+    Kitchen.fetchKitchens('kitchens.json').then((kitchens) {
+      setState(() {
+        this.kitchens = kitchens;
+      });
+    }).catchError((error) {
+      // Handle the error here. For example, show a user-friendly message or log it.
+      print('An error occurred while loading kitchens: $error');
+    });
+  }
+
+  Future<Kitchen> loadKitchen() async {
+    final data =
+        await loadJson('kitchen_001.json'); // Ensure this returns a valid JSON
+    return Kitchen.fromJson(data); // Make sure this maps the JSON correctly
+  }
+
   void _toggleTheme() {
     setState(() {
-      if (_themeMode == ThemeMode.light) {
-        _themeMode = ThemeMode.dark;
-      } else {
-        _themeMode = ThemeMode.light;
-      }
+      isDarkMode = !isDarkMode;
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     });
+  }
+
+  String getGreetingMessage() {
+    var hour = DateTime.now().hour; // Gets the current hour
+    if (hour < 12) {
+      return 'Good Morning, Anything on your mind for breakfast?';
+    } else if (hour < 17) {
+      return 'Good Afternoon, What\'s for lunch today?';
+    } else {
+      return 'Good Evening, Thinking about dinner?';
+    }
   }
 
   @override
@@ -44,9 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Stack(children: [
               Positioned(
                 top: propHeight(41),
-                child: Text(
-                    'Good Morning, Anything on your mind for breakfast ?',
-                    style: AppFonts.minittles),
+                child: Text(getGreetingMessage(), style: AppFonts.minittles),
               ),
               Row(
                 children: [
@@ -64,23 +96,29 @@ class _HomeScreenState extends State<HomeScreen> {
             Stack(
               alignment: Alignment.center,
               children: [
-                Image.asset(
-                  'assets/images/kitchenLight.png',
-                  width: propWidth(490),
-                  height: propHeight(490),
-                  fit: BoxFit.cover,
-                ),
+                isDarkMode
+                    ? Image.asset(
+                        'assets/images/kitchenDark.png',
+                        width: propWidth(460),
+                        height: propHeight(460),
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        'assets/images/kitchenLight.png',
+                        width: propWidth(460),
+                        height: propHeight(460),
+                        fit: BoxFit.cover,
+                      ),
                 Positioned(
                   top: propHeight(20),
                   right: propWidth(25),
                   child: GestureDetector(
-                    child: Image.asset(
-                      'assets/images/Do not Disturb iOS.png',
-                      width: propHeight(35),
-                      height: propWidth(35),
-                    ),
+                    child: isDarkMode
+                        ? Icon(Icons.light, color: AppColors.dark, size: 35)
+                        : Icon(Icons.dark_mode_rounded,
+                            color: AppColors.dark, size: 35),
                     onTap: () {
-                      _toggleTheme;
+                      _toggleTheme();
                     },
                   ),
                 ),
@@ -106,39 +144,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            SizedBox(
-              height: propHeight(15),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              clipBehavior: Clip.none,
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  CustomDeviceCard(
-                    title: 'Refrigerator - 1',
-                    itemCount: '41',
-                    imagePath: 'assets/images/Refg.png',
-                  ),
-                  SizedBox(width: propWidth(25)),
-                  CustomDeviceCard(
-                    title: 'Cabinet - 1',
-                    itemCount: '13',
-                    imagePath: 'assets/images/cabi.png',
-                  ),
-                  SizedBox(width: propWidth(25)),
-                  CustomDeviceCard(
-                    title: 'Refrigerator - 2',
-                    itemCount: '41',
-                    imagePath: 'assets/images/Refg1.png',
-                  ),
-                  SizedBox(width: propWidth(25)),
-                  CustomDeviceCard(
-                    title: 'Cabinet - 2',
-                    itemCount: '13',
-                    imagePath: 'assets/images/cabi1.png',
-                  ),
-                ],
+            SizedBox(height: propHeight(10)),
+            Container(
+              height: propHeight(230),
+              child: Expanded(
+                child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  clipBehavior: Clip.hardEdge,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: kitchens.length,
+                  itemBuilder: (context, index) {
+                    final kitchen = kitchens[index];
+                    return Row(
+                      children: kitchen.devices.map((device) {
+                        return CustomDeviceCard(
+                          title: device.deviceName,
+                          itemCount: device.categories
+                              .fold<int>(
+                                  0,
+                                  (previousValue, category) =>
+                                      previousValue + category.items.length)
+                              .toString(),
+                          imagePath: 'assets/images/${device.imagePath}',
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -147,3 +179,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+//not working future loading logic !! 
+// use with hazard !!
+//             FutureBuilder<Kitchen>(
+//               future: _kitchenFuture,
+//               builder: (context, snapshot) {
+//                 if (snapshot.connectionState == ConnectionState.waiting) {
+//                   return Center(child: CircularProgressIndicator());
+//                 } else if (snapshot.hasError) {
+//                   return Center(
+//                       child: Text("Error loading data: ${snapshot.error}"));
+//                 } else if (snapshot.hasData && snapshot.data != null) {
+//                   // Ensure devices is not null and is a list
+//                   final devices = snapshot.data!.devices;
+//                   if (devices.isEmpty) {
+//                     return Center(child: Text("No devices found"));
+//                   }
+//                   return SingleChildScrollView(
+//                     clipBehavior: Clip.none,
+//                     scrollDirection: Axis.horizontal,
+//                     child: Row(
+//                       crossAxisAlignment: CrossAxisAlignment.center,
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: devices.map((device) {
+//                         return CustomDeviceCard(
+//                           title: device.deviceName,
+//                           itemCount: device.categories
+//                               .fold<int>(
+//                                   0,
+//                                   (previousValue, category) =>
+//                                       previousValue + category.items.length)
+//                               .toString(),
+//                           imagePath: 'assets/images/${device.imagePath}',
+//                         );
+//                       }).toList(),
+//                     ),
+//                   );
+//                 } else {
+//                   return Center(
+//                       child: Column(
+//                     children: [
+//                       Icon(
+//                         Icons.cloud_off_rounded,
+//                         size: 100,
+//                         color: AppColors.red,
+//                       ),
+//                       Text("No Data Found"),
+//                     ],
+//                   ));
+//                 }
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

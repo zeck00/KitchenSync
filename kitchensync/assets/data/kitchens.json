@@ -8,10 +8,5 @@
       "kitchenID": "002",
       "kitchenName": "Rama's Kitchen",
       "devicesPath": "kitchen_002.json"
-    },
-    {
-      "kitchenID": "003",
-      "kitchenName": "Ziad's Kitchen1",
-      "devicesPath": "kitchen_002.json"
     }
   ]

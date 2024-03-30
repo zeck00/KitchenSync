@@ -1,16 +1,18 @@
 {
-  "kitchenID": "001",
-  "kitchenName": "Ziad's Kitchen",
+  "kitchenID": "002",
+  "kitchenName": "Rama's Kitchen",
   "devices": [
     {
-      "deviceID": "001",
+      "deviceID": "010",
       "deviceName": "Refrigerator",
-      "categoriesFile": "categories.json"
+      "categoriesFile": "categories.json",
+      "imagePath": "Refg1.png"
     },
     {
-      "deviceID": "002",
+      "deviceID": "011",
       "deviceName": "Refrigerator1",
-      "categoriesFile": "categories_002.json"
+      "categoriesFile": "categories_002.json",
+      "imagePath": "Refg1.png"
     }
   ]
 }

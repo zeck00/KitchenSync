@@ -116,7 +116,6 @@ Future<void> initializeAppData() async {
     await getLocalFile('kitchens.json');
     await getLocalFile('categories.json');
     await getLocalFile('responses.json');
-    await getLocalFile('devices.json');
     await getLocalFile('kitchen_001.json');
     await getLocalFile('categories_002.json');
     await getLocalFile('kitchen_002.json');
@@ -307,6 +306,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _loadItemsAndScheduleNotifications(context);
       _checkAndRequestNotificationPermissions(context);
@@ -361,7 +365,8 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       navigatorKey: navigatorKey,
-      themeMode: ThemeMode.light, // Use system theme mode by default
+      themeMode: ThemeMode.light,
+      // Use system theme mode by default
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

@@ -4,14 +4,15 @@
   "devices": [
     {
       "deviceID": "001",
-      "deviceName": "Refrigerator",
+      "deviceName": "Refrigerator1",
       "categoriesFile": "categories.json",
-      "imagePath": "001.png"
+      "imagePath": "Refg.png"
     },
     {
       "deviceID": "002",
       "deviceName": "Cabinet",
-      "categoriesFile": "categories_002.json"
+      "categoriesFile": "categories_002.json",
+      "imagePath": "Refg1.png"
     }
   ]
 }

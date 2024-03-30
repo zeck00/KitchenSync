@@ -188,7 +188,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
               ],
             ),
-            SizedBox(height: propHeight(15)), // Adjust as needed
+            SizedBox(height: propHeight(7)), // Adjust as needed
             SizedBox(
               height: 190,
               child: ListView.builder(
@@ -221,7 +221,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
         color: AppColors.primary,
-        elevation: 4,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
