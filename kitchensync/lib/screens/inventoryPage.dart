@@ -102,7 +102,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         return buildPage(
           device.deviceName,
           device.deviceName,
-          'assets/images/${device.imagePath}',
+          'assets/images/${device.bigImagePath}',
           device.deviceID,
         );
       },

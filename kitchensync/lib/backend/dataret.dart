@@ -84,21 +84,22 @@ class Device {
     required this.deviceName,
     required this.categoriesFile,
     required this.imagePath,
+    required this.bigImagePath,
   });
 
   String deviceID;
   String deviceName;
   String categoriesFile;
   String imagePath;
+  String bigImagePath;
 
   factory Device.fromJson(Map<String, dynamic> json) {
-    print(
-        'Creating Device from JSON: $json'); // Debug print the JSON being parsed
     return Device(
         deviceID: json['deviceID'] ?? '',
         deviceName: json['deviceName'] ?? '',
         categoriesFile: json['categoriesFile'] ?? '',
-        imagePath: json['imagePath'] ?? '');
+        imagePath: json['imagePath'] ?? '',
+        bigImagePath: json['bigImagePath'] ?? '');
   }
 
   List<Category> categories = [];
@@ -121,17 +122,38 @@ class Device {
       return []; // Return an empty list on error.
     }
   }
+
+  Future<void> loadCategoriesAndItems() async {
+    // Load categories first
+    await loadCategories(this.categoriesFile);
+    // Now load items for each category
+    for (var category in categories) {
+      // Assuming `itemPath` leads to the items JSON and category names match.
+      await category.loadItems(category.itemPath ?? 'items.json');
+    }
+  }
+
+  // Adjust getTotalItemCount to be synchronous since items are pre-loaded
+  int getTotalItemCount() {
+    int totalCount = 0;
+    for (var category in categories) {
+      totalCount += category.items.length;
+    }
+    return totalCount;
+  }
 }
 
 class Category {
   Category(
       {required this.categoryID,
       required this.categoryName,
-      required this.catIcon});
+      required this.catIcon,
+      this.itemPath});
 
   String categoryID;
   String categoryName;
   String catIcon;
+  String? itemPath;
 
   List<Item> items = []; // Initialize `items` here only.
 
@@ -148,6 +170,7 @@ class Category {
       categoryID: data['categoryID'],
       categoryName: data['categoryName'],
       catIcon: data['iconPath'],
+      itemPath: data['itemPath'],
     )..items =
         itemsList; // Use the cascade operator to assign `items` if it's not empty.
   }
@@ -178,6 +201,16 @@ class Category {
     return categoriesList
         .map((categoryData) =>
             Category.fromJson(categoryData as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> loadItems(String itemsFilePath) async {
+    final itemsJson = await loadJson(itemsFilePath);
+    final List<dynamic> jsonItems = itemsJson['items'];
+    // Filter and load items for this category
+    items = jsonItems
+        .where((item) => item['category'] == categoryName)
+        .map((item) => Item.fromJson(item))
         .toList();
   }
 }

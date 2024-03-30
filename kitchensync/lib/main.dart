@@ -113,6 +113,7 @@ Future<void> initializeAppData() async {
   try {
     // Add other file names as necessary
     await getLocalFile('items.json');
+    await getLocalFile('items1.json');
     await getLocalFile('kitchens.json');
     await getLocalFile('categories.json');
     await getLocalFile('responses.json');

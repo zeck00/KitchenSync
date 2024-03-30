@@ -4,37 +4,37 @@
         "categoryID": "01",
         "categoryName": "Dairy",
         "iconPath": "assets/images/Milk.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       },
       {
         "categoryID": "02",
         "categoryName": "Poltury",
         "iconPath": "assets/images/Thanksgiving.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       },
       {
         "categoryID": "03",
         "categoryName": "Produce",
         "iconPath": "assets/images/Produce.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       },
       {
         "categoryID": "04",
         "categoryName": "Eggs",
         "iconPath": "assets/images/Egg.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       },
       {
         "categoryID": "05",
         "categoryName": "Poltury",
         "iconPath": "assets/images/Thanksgiving.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       },
       {
         "categoryID": "06",
         "categoryName": "Poltury",
         "iconPath": "assets/images/Thanksgiving.png",
-        "itemPath": "items.json"
+        "itemPath": "items1.json"
       }
       
     ]

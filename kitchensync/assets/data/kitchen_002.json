@@ -6,13 +6,15 @@
       "deviceID": "010",
       "deviceName": "Refrigerator",
       "categoriesFile": "categories.json",
-      "imagePath": "Refg1.png"
+      "imagePath": "Refg1.png",
+      "bigImagePath": "002.png"
     },
     {
       "deviceID": "011",
       "deviceName": "Refrigerator1",
       "categoriesFile": "categories_002.json",
-      "imagePath": "Refg1.png"
+      "imagePath": "Refg1.png",
+      "bigImagePath": "001.png"
     }
   ]
 }

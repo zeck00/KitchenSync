@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, unused_import, file_names
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api, unused_import, file_names, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
@@ -19,21 +19,34 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Kitchen> kitchens = []; // Define kitchens here within the state
   bool isDarkMode = false;
   ThemeMode _themeMode = ThemeMode.system; // Default theme
-
-  Future<Kitchen>? _kitchenFuture;
-
   @override
   void initState() {
     super.initState();
-    // Here you should provide the actual asset path to your kitchens JSON file
-    Kitchen.fetchKitchens('kitchens.json').then((kitchens) {
+    loadKitchensAndDevices();
+  }
+
+  Future<void> loadKitchensAndDevices() async {
+    try {
+      // Fetch kitchens
+      List<Kitchen> kitchensLoaded =
+          await Kitchen.fetchKitchens('kitchens.json');
+
+      // For each kitchen, load devices, categories, and items
+      for (var kitchen in kitchensLoaded) {
+        for (var device in kitchen.devices) {
+          // Assuming loadCategoriesAndItems() is an async method in the Device class
+          await device.loadCategoriesAndItems();
+        }
+      }
+
+      // Once all data is loaded, update the state
       setState(() {
-        this.kitchens = kitchens;
+        kitchens = kitchensLoaded;
       });
-    }).catchError((error) {
-      // Handle the error here. For example, show a user-friendly message or log it.
-      print('An error occurred while loading kitchens: $error');
-    });
+    } catch (error) {
+      print('An error occurred while loading kitchens and devices: $error');
+      // Handle error state if necessary
+    }
   }
 
   Future<Kitchen> loadKitchen() async {
@@ -57,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (hour < 17) {
       return 'Good Afternoon, What\'s for lunch today?';
     } else {
-      return 'Good Evening, Thinking about dinner?';
+      return 'Good Evening, Thinking about something for dinner?';
     }
   }
 
@@ -147,32 +160,40 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: propHeight(10)),
             Container(
               height: propHeight(230),
-              child: Expanded(
-                child: ListView.builder(
-                  physics: BouncingScrollPhysics(),
-                  clipBehavior: Clip.hardEdge,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: kitchens.length,
-                  itemBuilder: (context, index) {
-                    final kitchen = kitchens[index];
-                    return Row(
-                      children: kitchen.devices.map((device) {
-                        return CustomDeviceCard(
-                          title: device.deviceName,
-                          itemCount: device.categories
-                              .fold<int>(
-                                  0,
-                                  (previousValue, category) =>
-                                      previousValue + category.items.length)
-                              .toString(),
-                          imagePath: 'assets/images/${device.imagePath}',
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
+              child: ListView.builder(
+                physics: BouncingScrollPhysics(),
+                clipBehavior: Clip.hardEdge,
+                scrollDirection: Axis.horizontal,
+                itemCount: kitchens.length,
+                itemBuilder: (context, index) {
+                  final kitchen = kitchens[index];
+                  return Row(
+                    children: kitchen.devices.map((device) {
+                      String itemCountText =
+                          device.getTotalItemCount().toString();
+                      return FutureBuilder<void>(
+                        future: device
+                            .loadCategoriesAndItems(), // Ensure this is the correct method name
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            // Data loading is complete, display the itemCount
+                            return CustomDeviceCard(
+                              title: device.deviceName,
+                              itemCount: itemCountText,
+                              imagePath: 'assets/images/${device.imagePath}',
+                            );
+                          } else {
+                            // Data loading in progress or encountered an error
+                            return Text('          ');
+                          }
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
               ),
-            ),
+            )
           ],
         ),
       ),
