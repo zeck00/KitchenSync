@@ -153,7 +153,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               width: propWidth(420),
               height: propHeight(370),
             ),
-            SizedBox(height: propHeight(20)), // Adjust as needed
+            SizedBox(height: propHeight(7)), // Adjust as needed
             Row(
               children: [
                 Text(
