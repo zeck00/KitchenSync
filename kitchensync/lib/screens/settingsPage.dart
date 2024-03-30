@@ -109,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       right: propWidth(25)), // space between cards
                   child: CustomDeviceCard(
                     title: '${device['name']} - ${device['count']}',
-                    itemCount: device['count']!,
+                    // itemCount: device['count']!,
                     imagePath: device['imagePath']!,
                   ),
                 );

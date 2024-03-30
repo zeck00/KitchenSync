@@ -143,8 +143,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                   onTap: () {
                     simulatePageUpdate();
-
-                    // Trigger loading overlay and delay
                   },
                 ),
               ],
@@ -155,7 +153,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               width: propWidth(420),
               height: propHeight(370),
             ),
-            SizedBox(height: propHeight(10)), // Adjust as needed
+            SizedBox(height: propHeight(20)), // Adjust as needed
             Row(
               children: [
                 Text(
@@ -190,7 +188,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ),
             SizedBox(height: propHeight(7)), // Adjust as needed
             SizedBox(
-              height: 190,
+              height: 200,
               child: ListView.builder(
                 clipBehavior: Clip.hardEdge,
                 physics: BouncingScrollPhysics(),

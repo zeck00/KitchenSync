@@ -409,50 +409,62 @@ class _AddItemPageState extends State<AddItemPage> {
                   },
                 ),
                 SizedBox(height: propHeight(10)),
-                InkWell(
-                  onTap: () {
-                    _selectDate(context, selectedPDate ?? DateTime.now(),
-                        (newDate) {
-                      setState(() {
-                        selectedPDate = newDate;
-                        _pDateController.text =
-                            DateFormat('yyyy-MM-dd').format(newDate);
-                      });
-                    });
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Production Date',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(propHeight(17))),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          _selectDate(context, selectedPDate ?? DateTime.now(),
+                              (newDate) {
+                            setState(() {
+                              selectedPDate = newDate;
+                              _pDateController.text =
+                                  DateFormat('yyyy-MM-dd').format(newDate);
+                            });
+                          });
+                        },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Production Date',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(propHeight(17))),
+                          ),
+                          child: Text(selectedPDate == null
+                              ? 'Select Date'
+                              : DateFormat('yyyy-MM-dd')
+                                  .format(selectedPDate!)),
+                        ),
+                      ),
                     ),
-                    child: Text(selectedPDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedPDate!)),
-                  ),
-                ),
-                SizedBox(height: propHeight(10)),
-                InkWell(
-                  onTap: () {
-                    _selectDate(context, selectedXDate ?? DateTime.now(),
-                        (newDate) {
-                      setState(() {
-                        selectedXDate = newDate;
-                        _xDateController.text =
-                            DateFormat('yyyy-MM-dd').format(newDate);
-                      });
-                    });
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Expiration Date',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(propHeight(17))),
+                    SizedBox(width: propWidth(10)),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          _selectDate(context, selectedXDate ?? DateTime.now(),
+                              (newDate) {
+                            setState(() {
+                              selectedXDate = newDate;
+                              _xDateController.text =
+                                  DateFormat('yyyy-MM-dd').format(newDate);
+                            });
+                          });
+                        },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Expiration Date',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(propHeight(17))),
+                          ),
+                          child: Text(selectedXDate == null
+                              ? 'Select Date'
+                              : DateFormat('yyyy-MM-dd')
+                                  .format(selectedXDate!)),
+                        ),
+                      ),
                     ),
-                    child: Text(selectedXDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedXDate!)),
-                  ),
+                  ],
                 ),
                 SizedBox(height: propHeight(10)),
                 InkWell(

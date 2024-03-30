@@ -162,38 +162,30 @@ class _HomeScreenState extends State<HomeScreen> {
               height: propHeight(230),
               child: ListView.builder(
                 physics: BouncingScrollPhysics(),
-                clipBehavior: Clip.hardEdge,
                 scrollDirection: Axis.horizontal,
-                itemCount: kitchens.length,
+                itemCount: kitchens
+                    .length, // Assuming you have multiple kitchens and you want to display devices from all kitchens
                 itemBuilder: (context, index) {
                   final kitchen = kitchens[index];
                   return Row(
                     children: kitchen.devices.map((device) {
-                      String itemCountText =
-                          device.getTotalItemCount().toString();
-                      return FutureBuilder<void>(
-                        future: device
-                            .loadCategoriesAndItems(), // Ensure this is the correct method name
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            // Data loading is complete, display the itemCount
-                            return CustomDeviceCard(
-                              title: device.deviceName,
-                              itemCount: itemCountText,
-                              imagePath: 'assets/images/${device.imagePath}',
-                            );
-                          } else {
-                            // Data loading in progress or encountered an error
-                            return Text('          ');
-                          }
-                        },
+                      // String itemCountText =
+                      //     device.getTotalItemCount().toString();
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                            right:
+                                20.0), // Adding some spacing between the cards
+                        child: CustomDeviceCard(
+                          title: device.deviceName,
+                          // itemCount: itemCountText,
+                          imagePath: 'assets/images/${device.imagePath}',
+                        ),
                       );
                     }).toList(),
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),

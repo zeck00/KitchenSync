@@ -269,6 +269,8 @@ class _OCRItemPageState extends State<OCRItemPage> {
           TextRecognizer(script: TextRecognitionScript.latin);
       final RecognizedText recognizedText =
           await textRecognizer.processImage(inputImage);
+      // You can further process the recognizedText to extract date or any other information
+      // For simplicity, let's assume you want to update the controller text with the recognized text
       setState(() {
         controller.text = recognizedText.text;
       });
@@ -365,78 +367,107 @@ class _OCRItemPageState extends State<OCRItemPage> {
                     SizedBox(width: propWidth(10)),
                   ],
                 ),
-                TextFormField(
-                  controller: _itemNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Item Name',
-                    suffixIcon: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween, // added line
-                      mainAxisSize: MainAxisSize.min, // added line
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.camera_alt_rounded,
-                              color: AppColors.dark),
-                          onPressed: () =>
-                              pickImageAndRecognizeText(_itemNameController),
-                        ),
-                        IconButton(
-                          icon:
-                              Icon(Icons.barcode_reader, color: AppColors.dark),
-                          onPressed: () => scanBarcode(_itemNameController),
-                        ),
-                      ],
-                    ),
-                    fillColor: AppColors.light,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(propHeight(17)),
-                    ),
-                  ),
-                ),
-                SizedBox(height: propHeight(10)),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: TextFormField(
-                        controller: _pDateController,
+                        controller: _itemNameController,
                         decoration: InputDecoration(
-                          labelText: 'Production Date',
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.camera_alt_rounded,
-                                color: AppColors.dark),
-                            onPressed: () =>
-                                pickImageAndRecognizeText(_pDateController),
-                          ),
+                          labelText: 'Item Name',
                           fillColor: AppColors.light,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              propHeight(17),
-                            ),
+                            borderRadius: BorderRadius.circular(propHeight(17)),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _xDateController,
-                        decoration: InputDecoration(
-                          labelText: 'Expiration Date',
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.camera_alt_rounded,
-                                color: AppColors.dark),
-                            onPressed: () =>
-                                pickImageAndRecognizeText(_xDateController),
-                          ),
-                          fillColor: AppColors.light,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              propHeight(17),
+                    IconButton(
+                      icon:
+                          Icon(Icons.camera_alt_rounded, color: AppColors.dark),
+                      onPressed: () =>
+                          pickImageAndRecognizeText(_itemNameController),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.barcode_reader, color: AppColors.dark),
+                      onPressed: () => scanBarcode(_itemNameController),
+                    ),
+                  ],
+                ),
+                SizedBox(height: propHeight(10)),
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              _selectDate(
+                                  context, selectedPDate ?? DateTime.now(),
+                                  (newDate) {
+                                setState(() {
+                                  selectedPDate = newDate;
+                                  _pDateController.text =
+                                      DateFormat('yyyy-MM-dd').format(newDate);
+                                });
+                              });
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Production Date',
+                                border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(propHeight(17))),
+                              ),
+                              child: Text(selectedPDate == null
+                                  ? 'Select Date'
+                                  : DateFormat('yyyy-MM-dd')
+                                      .format(selectedPDate!)),
                             ),
                           ),
                         ),
-                      ),
+                        IconButton(
+                          icon: Icon(Icons.camera_alt),
+                          onPressed: () =>
+                              pickImageAndRecognizeText(_pDateController),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: propHeight(10)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              _selectDate(
+                                  context, selectedXDate ?? DateTime.now(),
+                                  (newDate) {
+                                setState(() {
+                                  selectedXDate = newDate;
+                                  _xDateController.text =
+                                      DateFormat('yyyy-MM-dd').format(newDate);
+                                });
+                              });
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Expiry Date',
+                                border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(propHeight(17))),
+                              ),
+                              child: Text(selectedXDate == null
+                                  ? 'Select Date'
+                                  : DateFormat('yyyy-MM-dd')
+                                      .format(selectedXDate!)),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.camera_alt),
+                          onPressed: () =>
+                              pickImageAndRecognizeText(_xDateController),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -462,7 +493,73 @@ class _OCRItemPageState extends State<OCRItemPage> {
                   ),
                 ),
                 SizedBox(height: propHeight(10)),
-                // Dropdowns for category, kitchen, and device
+                TextFormField(
+                  controller: _itemInfoController,
+                  decoration: InputDecoration(
+                    labelText: 'Item Info',
+                    fillColor: AppColors.light,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: propHeight(10)),
+                TextFormField(
+                  controller: _quantityController,
+                  decoration: InputDecoration(
+                    labelText: 'Quantity',
+                    fillColor: AppColors.light,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: propHeight(10)),
+                TextFormField(
+                  controller: _nfcTagIdController,
+                  decoration: InputDecoration(
+                    labelText: 'NFC Tag ID',
+                    fillColor: AppColors.light,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
+                  onSaved: (newValue) {
+                    newItem?.nfcTagID = newValue ?? '';
+                  },
+                ),
+                SizedBox(height: propHeight(10)),
+                DropdownButtonFormField<String>(
+                  value: _selectedUnit,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedUnit = newValue!;
+                    });
+                  },
+                  items: _units.map<DropdownMenuItem<String>>((String unit) {
+                    return DropdownMenuItem<String>(
+                      value: unit,
+                      child: Text(unit),
+                    );
+                  }).toList(),
+                  decoration: InputDecoration(
+                    labelText: 'Unit',
+                    fillColor: AppColors.light,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        propHeight(17),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: propHeight(10)),
                 DropdownButtonFormField<String>(
                   value: selectedCategory,
                   onChanged: (newValue) {
@@ -539,73 +636,6 @@ class _OCRItemPageState extends State<OCRItemPage> {
                   ),
                 ),
                 SizedBox(height: propHeight(10)),
-                TextFormField(
-                  controller: _itemInfoController,
-                  decoration: InputDecoration(
-                    labelText: 'Item Info',
-                    fillColor: AppColors.light,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        propHeight(17),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: propHeight(10)),
-                TextFormField(
-                  controller: _quantityController,
-                  decoration: InputDecoration(
-                    labelText: 'Quantity',
-                    fillColor: AppColors.light,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        propHeight(17),
-                      ),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                SizedBox(height: propHeight(10)),
-                TextFormField(
-                  controller: _nfcTagIdController,
-                  decoration: InputDecoration(
-                    labelText: 'NFC Tag ID',
-                    fillColor: AppColors.light,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        propHeight(17),
-                      ),
-                    ),
-                  ),
-                  onSaved: (newValue) {
-                    newItem?.nfcTagID = newValue ?? '';
-                  },
-                ),
-                SizedBox(height: propHeight(10)),
-                DropdownButtonFormField<String>(
-                  value: _selectedUnit,
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedUnit = newValue!;
-                    });
-                  },
-                  items: _units.map<DropdownMenuItem<String>>((String unit) {
-                    return DropdownMenuItem<String>(
-                      value: unit,
-                      child: Text(unit),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    labelText: 'Unit',
-                    fillColor: AppColors.light,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        propHeight(17),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
               ],
             ),
           ),
@@ -660,3 +690,35 @@ OverlayEntry _createOverlayEntry(BuildContext context, String itemName) {
     ),
   );
 }
+
+void showOverlay(BuildContext context) async {
+  OverlayState overlayState = Overlay.of(context);
+  OverlayEntry overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      top: MediaQuery.of(context).size.height / 2 - 100,
+      left: MediaQuery.of(context).size.width / 2 - 100,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            'Item Added',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  overlayState.insert(overlayEntry);
+
+  // Wait for 3 seconds and remove the overlay
+  await Future.delayed(Duration(seconds: 3));
+  overlayEntry.remove();
+}
+
+                    // Call this function where you need to show the overlay.

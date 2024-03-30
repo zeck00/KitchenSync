@@ -7,14 +7,14 @@ import '../styles/size_config.dart';
 
 class CustomDeviceCard extends StatelessWidget {
   final String title;
-  final String itemCount;
+  // final String itemCount;
   final String imagePath;
   final Color containerColor;
 
   const CustomDeviceCard({
     super.key,
     required this.title,
-    required this.itemCount,
+    // required this.itemCount,
     required this.imagePath,
     this.containerColor = AppColors.primary,
   });
@@ -24,7 +24,6 @@ class CustomDeviceCard extends StatelessWidget {
     return GestureDetector(
       child: Row(
         children: [
-          SizedBox(width: 20),
           Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.center,
@@ -57,23 +56,35 @@ class CustomDeviceCard extends StatelessWidget {
                 ),
               ),
               Positioned(
-                bottom: propHeight(12),
-                right: propWidth(12),
-                left: propWidth(12),
+                bottom: propHeight(5),
                 child: Row(
                   children: [
                     Text(
                       title,
                       style: AppFonts.locCard,
                     ),
-                    Expanded(child: Container()),
-                    Text(
-                      itemCount,
-                      style: AppFonts.locCard,
-                    ),
                   ],
                 ),
               ),
+
+              // Positioned(
+              //   bottom: propHeight(12),
+              //   right: propWidth(12),
+              //   left: propWidth(12),
+              //   child: Row(
+              //     children: [
+              //       Text(
+              //         title,
+              //         style: AppFonts.locCard,
+              //       ),
+              //       // Expanded(child: Container()),
+              //       // Text(
+              //       //   itemCount,
+              //       //   style: AppFonts.locCard,
+              //       // ),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ],
