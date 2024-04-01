@@ -12,6 +12,7 @@ import 'package:kitchensync/styles/size_config.dart';
 import 'dart:ui' as ui;
 import '../backend/dataret.dart';
 import 'inventoryPage.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ItemsScreen extends StatefulWidget {
   final String deviceId; // The device ID passed to this screen
@@ -252,30 +253,50 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               ),
               child: Column(
                 children: category.items.map<Widget>((item) {
-                  return ListTile(
-                    onTap: () =>
-                        _showItemDetailsPopup(context, item), // Show the popup
-                    title: Row(
+                  return Slidable(
+                    startActionPane: ActionPane(
+                      motion: StretchMotion(),
                       children: [
-                        Text(
-                          item.itemName,
-                          style: AppFonts.servicename,
-                        ),
-                        if (item.status !=
-                            'fresh') // Show warning icon if not fresh
-                          Padding(
-                            padding: EdgeInsets.only(left: propWidth(8)),
-                            child: Image.asset(
-                              'assets/images/Warning.png',
-                              width: propWidth(24),
-                              height: propHeight(24),
-                            ),
-                          ),
+                        SlidableAction(
+                          onPressed: ((context) {}),
+                          backgroundColor: AppColors.red,
+                          icon: Icons.delete,
+                        )
                       ],
                     ),
-                    trailing: Text(
-                      '${item.quantity} ${item.unit}', // Displaying quantity with unit
-                      style: AppFonts.numbers1,
+                    endActionPane: ActionPane(
+                      motion: StretchMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: ((context) {}),
+                          backgroundColor: AppColors.red,
+                          icon: Icons.delete,
+                        )
+                      ],
+                    ),
+                    child: ListTile(
+                      onTap: () => _showItemDetailsPopup(context, item),
+                      title: Row(
+                        children: [
+                          Text(
+                            item.itemName,
+                            style: AppFonts.servicename,
+                          ),
+                          if (item.status != 'fresh')
+                            Padding(
+                              padding: EdgeInsets.only(left: propWidth(8)),
+                              child: Image.asset(
+                                'assets/images/Warning.png',
+                                width: propWidth(24),
+                                height: propHeight(24),
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: Text(
+                        '${item.quantity} ${item.unit}',
+                        style: AppFonts.numbers1,
+                      ),
                     ),
                   );
                 }).toList(),

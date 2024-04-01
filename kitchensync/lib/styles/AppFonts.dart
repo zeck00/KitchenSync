@@ -112,4 +112,28 @@ class AppFonts {
     fontWeight: FontWeight.w500,
     color: AppColors.primary, // This will be added to AppColors
   );
+
+  static final TextStyle onBoardtxt = GoogleFonts.cairo(
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    color: AppColors.dark,
+  );
+
+  static final TextStyle onBoardtxt1 = GoogleFonts.cairo(
+    fontSize: 20,
+    fontWeight: FontWeight.w300,
+    color: AppColors.dark,
+  );
+
+  static final TextStyle login = GoogleFonts.cairo(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: AppColors.light,
+  );
+
+  static final TextStyle login1 = GoogleFonts.cairo(
+    fontSize: 12,
+    fontWeight: FontWeight.w900,
+    color: AppColors.dark,
+  );
 }

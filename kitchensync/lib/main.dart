@@ -14,9 +14,12 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:kitchensync/screens/onBoardingPages.dart';
 
 final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-const platform = MethodChannel('com.example.kitchensync/alarm_permission');
+const platform = MethodChannel('com.kitchensync.app/alarm_permission');
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -24,6 +27,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   tz.initializeTimeZones();
   await initializeAppData();
 
@@ -376,10 +382,9 @@ class _MyAppState extends State<MyApp> {
       ),
       darkTheme: ThemeData(
         colorScheme: darkColorScheme,
-        useMaterial3: false, // Or true if you want to use Material 3
-        // Define other dark theme settings if necessary
+        useMaterial3: false,
       ),
-      home: MainLayout(),
+      home: OnboardingScreen(),
     );
   }
 }

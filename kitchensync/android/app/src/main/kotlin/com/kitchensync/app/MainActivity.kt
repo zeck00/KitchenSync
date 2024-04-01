@@ -1,4 +1,4 @@
-package com.example.kitchensync
+package com.kitchensync.app
 
 import android.app.AlarmManager
 import android.content.Intent
@@ -9,7 +9,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.kitchensync/alarm_permission"
+    private val CHANNEL = "com.kitchensync.app/alarm_permission"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

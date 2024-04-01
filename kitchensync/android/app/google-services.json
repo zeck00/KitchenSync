@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "227995726984",
+    "project_id": "kitchensync-z",
+    "storage_bucket": "kitchensync-z.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227995726984:android:e15394796311c66f191b3d",
+        "android_client_info": {
+          "package_name": "com.kitchensync.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiXBA9m_YGoQaT8PYkjHov_dHrD4wIPZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
