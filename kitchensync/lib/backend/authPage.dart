@@ -21,6 +21,28 @@ class _AuthPageState extends State<AuthPage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return MainLayout();
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Outer larger circle
+                CircularProgressIndicator(
+                  strokeCap: StrokeCap.round,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.lightBlueAccent),
+                  strokeWidth: 8,
+                  backgroundColor: Colors.grey[300],
+                ),
+                // Inner smaller circle
+                CircularProgressIndicator(
+                  strokeCap: StrokeCap.round,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                  strokeWidth: 4,
+                ),
+              ],
+            ),
+          );
         } else {
           return OnboardingScreen();
         }

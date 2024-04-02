@@ -1,8 +1,10 @@
-// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, file_names
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, file_names, use_build_context_synchronously
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/screens/customDeviceCard.dart';
+import 'package:kitchensync/screens/loginPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +18,19 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  Future<void> _signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to sign out'),
+      ));
+    }
+
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => LoginPage()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +78,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 throw 'Could not launch';
               }
             },
+          ),
+          SizedBox(height: propHeight(10)),
+          ElevatedButton(
+            autofocus: true,
+            style: ButtonStyle(
+                elevation: MaterialStatePropertyAll(0),
+                backgroundColor:
+                    MaterialStatePropertyAll(Colors.white.withAlpha(0))),
+            onPressed: _signOut,
+            child: Container(
+                width: propWidth(200),
+                height: propHeight(45),
+                decoration: BoxDecoration(
+                    color: AppColors.red,
+                    borderRadius: BorderRadius.circular(propWidth(17))),
+                child: Center(
+                  child: Text(
+                    'Sign Out',
+                    style: AppFonts.login,
+                  ),
+                )),
           ),
           // The "We Listen" section with communication options
           _buildCommunicationOptionsSection(),
@@ -185,7 +221,7 @@ Widget _buildListItem(String title, onTap) {
 Widget _buildCommunicationOptionsSection() {
   return Column(
     children: [
-      SizedBox(height: propHeight(30)),
+      SizedBox(height: propHeight(10)),
       Text(
         'We Listen!',
         style: AppFonts.appname,

@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_final_fields, prefer_const_constructors, prefer_const_literals_to_create_immutables, camel_case_types, file_names
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/loginPage.dart';
