@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
+import 'package:kitchensync/screens/forgotPasswordPage.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/screens/registerPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -169,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
     initSizeConfig(context);
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(propHeight(16)),
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Center(
@@ -240,12 +241,35 @@ class _LoginPageState extends State<LoginPage> {
                           color: AppColors.red),
                     ),
                   ),
-                SizedBox(height: 24),
+                SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return forgotPasswordPage();
+                        },
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(propWidth(8), 0, 0, 0),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Forgot Password?',
+                          style: AppFonts.subtitle1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // RippleButton(
                 //   onTap: _handleLogin, // Pass the login logic as a callback
                 // ),
-
+                SizedBox(height: 24),
                 ElevatedButton(
                   autofocus: true,
                   style: ButtonStyle(
@@ -307,6 +331,10 @@ class _LoginPageState extends State<LoginPage> {
                         width: propWidth(40), height: propHeight(40)),
                   ),
                 ),
+                SizedBox(height: propHeight(100)),
+                Text(
+                    '© ${DateTime.now().year} KitchenSync. All Rights Reserved.',
+                    style: AppFonts.minittles)
               ],
             ),
           ),

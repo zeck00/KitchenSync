@@ -218,6 +218,10 @@ class _registerPageState extends State<registerPage> {
                         width: propWidth(40), height: propHeight(40)),
                   ),
                 ),
+                SizedBox(height: propHeight(80)),
+                Text(
+                    '© ${DateTime.now().year} KitchenSync. All Rights Reserved.',
+                    style: AppFonts.minittles)
               ],
             ),
           ),
