@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors_in_immutables, library_private_types_in_public_api, file_names, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:kitchensync/screens/loginPage.dart';
+import 'package:kitchensync/screens/registerPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:lottie/lottie.dart';
@@ -20,6 +20,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   Timer? _pageChangeTimer;
   int currentPage = 0; // To track the current page index
+  bool showLoginPage = true;
+
+  void toggleScreens() {
+    setState(() {
+      showLoginPage = !showLoginPage;
+    });
+  }
 
   @override
   void initState() {
@@ -28,13 +35,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _navigateToLogin(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => registerPage(),
+    ));
   }
 
   void _startAutoScroll() {
-    _pageChangeTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    _pageChangeTimer = Timer.periodic(Duration(seconds: 8), (Timer timer) {
       int nextPage = _controller.page!.round() + 1;
       if (nextPage < 3) {
         _controller.animateToPage(nextPage,

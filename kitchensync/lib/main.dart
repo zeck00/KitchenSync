@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kitchensync/backend/authPage.dart';
 import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
@@ -384,7 +385,7 @@ class _MyAppState extends State<MyApp> {
         colorScheme: darkColorScheme,
         useMaterial3: false,
       ),
-      home: OnboardingScreen(),
+      home: AuthPage(),
     );
   }
 }

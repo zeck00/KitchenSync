@@ -1,167 +1,57 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, file_names, unused_field, use_build_context_synchronously
+// ignore_for_file: prefer_final_fields, prefer_const_constructors, prefer_const_literals_to_create_immutables, camel_case_types, file_names
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
-import 'package:kitchensync/screens/homePage.dart';
-import 'package:kitchensync/screens/registerPage.dart';
+import 'package:kitchensync/screens/loginPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
-import 'package:kitchensync/styles/rippleButton.dart';
 import 'package:kitchensync/styles/size_config.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({
+class registerPage extends StatefulWidget {
+  const registerPage({
     super.key,
   });
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<registerPage> createState() => _registerPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  // Add your state variables here if you have any
+class _registerPageState extends State<registerPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _conpasswordController = TextEditingController();
   bool _isButtonDisabled = true; // Initial state of the login button
   bool _showEmailError = false;
   bool _showPasswordError = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Add listeners to controllers to enable the button when conditions are met
-    _emailController.addListener(_validateForm);
-    _passwordController.addListener(_validateForm);
+  Future _handleRegister() async {
+    if (passwordConfirmed()) {
+      FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+    }
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => MainLayout(),
+    ));
   }
 
-  void _validateForm() {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    final isValidEmail =
-        RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-
-    setState(() {
-      // Email format error
-      _showEmailError = email.isNotEmpty && !isValidEmail;
-      // Password error (simply checks if the password field is empty)
-      _showPasswordError = _passwordController.text.isEmpty;
-      // Determines if the login button should be disabled
-      _isButtonDisabled = email.isEmpty || password.isEmpty || !isValidEmail;
-    });
+  bool passwordConfirmed() {
+    if (_passwordController.text.trim() == _conpasswordController.text.trim()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _conpasswordController.dispose();
     super.dispose();
-  }
-
-  void _handleLogin() async {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Outer larger circle
-              CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.lightBlueAccent),
-                strokeWidth: 8,
-                backgroundColor: Colors.grey[300],
-              ),
-              // Inner smaller circle
-              CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                strokeWidth: 4,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-      if (mounted) {
-        Navigator.of(context).pop(); // Close the loading dialog
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainLayout()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        Navigator.of(context)
-            .pop(); // Ensure to close the loading dialog even on error
-        showErrorMessage(e.code); // Show the error dialog
-      }
-    }
-  }
-
-  void showErrorMessage(String errorCode) {
-    String errorMessage;
-
-    if (errorCode == 'user-not-found') {
-      errorMessage = 'No user found for that email.';
-    } else if (errorCode == 'wrong-password') {
-      errorMessage = 'Wrong password provided for that user.';
-    } else {
-      errorMessage = 'An unexpected error occurred.';
-    }
-
-    if (mounted) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            elevation: 20,
-            shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(propWidth(17))),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Login Error',
-                  style: AppFonts.warning,
-                ),
-              ],
-            ),
-            content: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [Text(errorMessage)]),
-            actions: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextButton(
-                    child: Text(
-                      'OK',
-                      style: AppFonts.appname,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-    }
   }
 
   @override
@@ -191,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: AppFonts.welcomemsg1,
                 ),
                 Text(
-                  'Please Login',
+                  'Please Register',
                   style: AppFonts.subtitle1,
                 ),
                 SizedBox(height: propHeight(20)),
@@ -240,6 +130,28 @@ class _LoginPageState extends State<LoginPage> {
                           color: AppColors.red),
                     ),
                   ),
+                SizedBox(height: propHeight(17)),
+                TextField(
+                  controller: _conpasswordController, // And this one
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(propWidth(17))),
+                  ),
+                  obscureText: true,
+                ),
+                SizedBox(height: propHeight(5)),
+                if (_showPasswordError)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Password is not entered.',
+                      style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 12,
+                          color: AppColors.red),
+                    ),
+                  ),
                 SizedBox(height: 24),
 
                 // RippleButton(
@@ -252,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                       elevation: MaterialStatePropertyAll(0),
                       backgroundColor:
                           MaterialStatePropertyAll(Colors.white.withAlpha(0))),
-                  onPressed: _isButtonDisabled ? null : () => _handleLogin(),
+                  onPressed: _isButtonDisabled ? null : () => _handleRegister(),
                   // Button is disabled if _isButtonDisabled is true
                   child: Container(
                       width: propWidth(600),
@@ -262,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(propWidth(17))),
                       child: Center(
                         child: Text(
-                          'Login',
+                          'Sign Up',
                           style: AppFonts.login,
                         ),
                       )),
@@ -272,18 +184,18 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => registerPage()),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Not a member?',
+                          'Already a member?',
                           style: AppFonts.subtitle,
                         ),
                         Text(
-                          ' Register now',
+                          ' Login now',
                           style: AppFonts.subtitle1,
                         ),
                       ],
