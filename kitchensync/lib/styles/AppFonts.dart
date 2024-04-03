@@ -136,4 +136,10 @@ class AppFonts {
     fontWeight: FontWeight.w900,
     color: AppColors.dark,
   );
+
+  static final TextStyle registeration = GoogleFonts.cairo(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.dark,
+  );
 }

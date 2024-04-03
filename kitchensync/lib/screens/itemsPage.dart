@@ -183,6 +183,46 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
   // Initially set isExpanded to true for default expanded state
   bool isExpanded = true;
 
+  void _deleteItem(Item item) async {
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Center(
+          child: AlertDialog(
+            shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(propWidth(17))),
+            backgroundColor: AppColors.light,
+            title: Text('Delete Item'),
+            content: Text('Are you sure you want to delete this item?'),
+            actions: [
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: Text('Delete', style: TextStyle(color: AppColors.red)),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // If deletion is confirmed
+    if (confirm == true) {
+      await item.delete();
+
+      // Update the state to reflect the change
+      setState(() {
+        // Assuming you have a method to remove the item from the category
+        widget.category.items.remove(item);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final category = widget.category;
@@ -258,9 +298,9 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                       motion: StretchMotion(),
                       children: [
                         SlidableAction(
-                          onPressed: ((context) {}),
+                          onPressed: ((context) => _deleteItem(item)),
                           backgroundColor: AppColors.red,
-                          icon: Icons.delete,
+                          icon: Icons.delete_rounded,
                         )
                       ],
                     ),
@@ -268,7 +308,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                       motion: StretchMotion(),
                       children: [
                         SlidableAction(
-                          onPressed: ((context) {}),
+                          onPressed: ((context) => _deleteItem(item)),
                           backgroundColor: AppColors.red,
                           icon: Icons.delete,
                         )

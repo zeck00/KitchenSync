@@ -404,4 +404,28 @@ class Item {
       }
     }
   }
+
+  Future<void> delete() async {
+    // Get the path to the file
+    final file = await _localFile;
+
+    // Read the current contents of the file
+    final jsonString = await file.readAsString();
+
+    // Decode the JSON into a Map structure
+    Map<String, dynamic> jsonFile = json.decode(jsonString);
+
+    // This line was causing the error since jsonFile is a Map, not a List
+    // Correctly access the 'items' list within the Map
+    List<dynamic> items = jsonFile['items'];
+
+    // Remove the item with the matching 'itemID'
+    items.removeWhere((item) => item['itemID'] == this.itemID);
+
+    // Encode the modified jsonFile back into a string
+    final String updatedJsonString = json.encode(jsonFile);
+
+    // Write the updated JSON string back to the file, overwriting the old contents
+    await file.writeAsString(updatedJsonString, flush: true);
+  }
 }
