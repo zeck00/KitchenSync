@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors_in_immutables, library_private_types_in_public_api, file_names, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:kitchensync/screens/registerPage.dart';
+import 'package:kitchensync/screens/welcomePage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:lottie/lottie.dart';
@@ -36,7 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _navigateToLogin(BuildContext context) {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => registerPage(),
+      builder: (context) => WelcomeScreen(),
     ));
   }
 
