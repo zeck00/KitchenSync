@@ -1,7 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, file_names
 
 import 'package:flutter/material.dart';
-import 'package:flutter/animation.dart'; // For AnimationController, Tween, etc.
+// For AnimationController, Tween, etc.
 import 'package:kitchensync/styles/AppColors.dart'; // Replace with the correct path to your AppColors
 import 'package:kitchensync/styles/AppFonts.dart'; // Replace with the correct path to your AppFonts
 import 'package:kitchensync/styles/size_config.dart'; // Assuming you have a SizeConfig setup for responsive sizing

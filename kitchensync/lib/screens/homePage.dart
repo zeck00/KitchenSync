@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
         kitchens = kitchensLoaded;
       });
     } catch (error) {
-      print('An error occurred while loading kitchens and devices: $error');
+      rethrow;
       // Handle error state if necessary
     }
   }

@@ -48,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         itemsList = loadedItems;
       });
     } catch (e) {
-      print("Failed to load items: $e");
+      rethrow;
       // Handle the error or show a message to the user
     }
   }
