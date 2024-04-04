@@ -373,7 +373,7 @@ class _registerPageState extends State<registerPage> {
                     ),
                     SizedBox(height: 16),
                     GestureDetector(
-                      onTap: () => AuthService().signInWithGoogle(),
+                      onTap: () => AuthService().signInWithGoogle(context),
                       child: CircleAvatar(
                         radius: propWidth(30),
                         backgroundColor: AppColors.grey2,

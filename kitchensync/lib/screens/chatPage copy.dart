@@ -1,6 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers, sized_box_for_whitespace
+// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers, sized_box_for_whitespace, unused_import
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:kitchensync/screens/appBar.dart';
@@ -40,14 +41,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadItems() async {
-    final String itemsString =
-        await rootBundle.loadString('assets/data/items.json');
-    final Map<String, dynamic> itemsJson = json.decode(itemsString);
-    setState(() {
-      itemsList = (itemsJson['items'] as List)
-          .map((itemJson) => Item.fromJson(itemJson))
-          .toList();
-    });
+    try {
+      // Assuming loadAllItems returns a List<Item>
+      final loadedItems = await Item.loadAllItems('items.json');
+      setState(() {
+        itemsList = loadedItems;
+      });
+    } catch (e) {
+      rethrow;
+      // Handle the error or show a message to the user
+    }
   }
 
   Future<void> _loadResponses() async {
@@ -71,63 +74,78 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void _simulateBotTyping(String message) {
-    // Initialize index to track the current character position
     int index = 0;
-    _isBotTyping = true;
+    setState(() {
+      // Check if the bot is already typing; if not, add a new typing message
+      if (!_isBotTyping ||
+          messages.isEmpty ||
+          messages.last["sender"] != "bot") {
+        messages.add({"sender": "bot", "data": ""});
+      }
+      _isBotTyping = true;
+    });
 
-    // Cancel any previous timer to avoid overlapping effects
     _typingTimer?.cancel();
-
-    // Start a new timer that periodically updates the typing message
     _typingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      // Check if all characters have been "typed"
       if (index < message.length) {
         setState(() {
-          // Append the next character to the typing message
-          _typingMessage = message.substring(0, index + 1);
-          // Update the last message or add a new one if necessary
-          if (messages.isNotEmpty &&
-              messages.last["sender"] == "bot" &&
-              _isBotTyping) {
-            messages.last["data"] = _typingMessage;
-          } else {
-            messages.add({"sender": "bot", "data": _typingMessage});
-          }
+          _typingMessage =
+              '${message.substring(0, index + 1)}|'; // Append cursor
+          // Ensure we update the last bot message, not add a new one
+          messages.last["data"] = _typingMessage; // Update last message
         });
         index++;
       } else {
-        // Stop the timer and reset typing state once the entire message is "typed"
-        timer.cancel();
+        // Once complete, remove cursor and cancel timer
         setState(() {
-          _isBotTyping = false;
-          _typingMessage = ""; // Clear the temporary typing message
+          _typingMessage = message; // Full message without cursor
+          messages.last["data"] = _typingMessage; // Update last message
+          _isBotTyping = false; // Typing done
         });
-      }
-
-      // Scroll to the bottom to ensure the latest part of the message is visible
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 100),
-          curve: Curves.easeOut,
-        );
+        timer.cancel();
+        _scrollToBottom(); // Scroll to bottom after typing is done
       }
     });
   }
 
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   void _handleUserInput(String input) {
+    // Clear the text field after the message is sent
+    _controller.clear();
+
+    // Split the user input into words for case-insensitive matching
+    final List<String> inputWords = input.toLowerCase().split(' ');
+
     setState(() {
       messages.add({"sender": "user", "data": input});
     });
 
-    // Simulate a bot response based on the user input
-    if (responses.containsKey(input)) {
-      final String botResponse = responses[input]![
-          0]; // Example: picking the first response for simplicity
-      _simulateBotTyping(botResponse);
-    } else {
-      _simulateBotTyping("I'm not sure how to respond to that.");
+    // Search for a bot response that contains any of the input words
+    String botResponse = "I'm not sure how to respond to that.";
+    for (String word in inputWords) {
+      for (String key in responses.keys) {
+        if (key.toLowerCase().contains(word)) {
+          botResponse =
+              responses[key]![0]; // Get the first response for simplicity
+          break;
+        }
+      }
+      if (botResponse != "I'm not sure how to respond to that.") {
+        // Found a response, no need to keep looking
+        break;
+      }
     }
+
+    _simulateBotTyping(botResponse);
   }
 
   @override
@@ -148,12 +166,20 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             child: ListView.builder(
               controller: _scrollController,
               physics: BouncingScrollPhysics(),
-              itemCount: messages.length,
+              itemCount: messages.length +
+                  (_isBotTyping ? 1 : 0), // Adjust for typing indicator
               itemBuilder: (context, index) {
+                if (_isBotTyping && index == messages.length) {
+                  // Return TypingIndicator here instead of a chat bubble
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child:
+                        TypingIndicator(), // Ensure this is styled to match your chat UI
+                  );
+                }
                 final message = messages[index];
                 final isUser = message["sender"] == "user";
-                return _buildChatBubble(message["data"], isUser,
-                    _isBotTyping && index == messages.length - 1);
+                return _buildChatBubble(message["data"], isUser, false);
               },
             ),
           ),
@@ -171,7 +197,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Widget _itemSelectionDropdown() {
-    // Returns a dropdown button for item selection
+    if (itemsList.isEmpty) {
+      // Show a loading indicator or a message until items are loaded
+      return Center(child: CircularProgressIndicator());
+    }
+    // Dropdown is enabled with items in the list
     return DropdownButtonFormField<String>(
       value: selectedItem,
       onChanged: (newValue) {
@@ -180,7 +210,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           _handleUserInput(selectedItem!);
         });
       },
-      items: itemsList.map<DropdownMenuItem<String>>((Item item) {
+      items: itemsList.map((Item item) {
         return DropdownMenuItem<String>(
           value: item.itemName,
           child: Text(item.itemName),
@@ -218,6 +248,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildChatBubble(String message, bool isUser, bool isTyping) {
+    // When isTyping is true and the message sender is not the user, show the typing indicator
+    final content = isTyping && !isUser
+        ? TypingIndicator()
+        : Text(
+            message,
+            style: isUser ? AppFonts.cardTitle : AppFonts.numbers1,
+          );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Align(
@@ -225,9 +263,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
           decoration: BoxDecoration(
-            color: isUser
-                ? AppColors.primary
-                : AppColors.grey1, // Assuming you have these colors defined
+            color: isUser ? AppColors.primary : AppColors.grey1,
             borderRadius: isUser
                 ? const BorderRadius.only(
                     topLeft: Radius.circular(15),
@@ -240,60 +276,60 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     topLeft: Radius.circular(15),
                   ),
           ),
-          child: isTyping && !isUser
-              ? TypingIndicator()
-              : Text(
-                  message,
-                  style: isUser
-                      ? AppFonts.cardTitle
-                      : AppFonts
-                          .numbers1, // Assuming you have these fonts defined
-                ),
+          child: content,
         ),
       ),
     );
   }
 }
 
-class TypingIndicator extends StatelessWidget {
+class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
 
   @override
+  _TypingIndicatorState createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          _controller.forward();
+        }
+      });
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 20, // Adjust the height to fit your design
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ...List.generate(3, (index) {
-            return AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 2.0),
-              height: 8.0,
-              width: 8.0,
-              decoration: BoxDecoration(
-                color:
-                    AppColors.greySub, // Assuming you have this color defined
-                shape: BoxShape.circle,
-              ),
-              // Creating a simple bounce effect
-              child: Opacity(
-                opacity: (index + 1) / 3,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: 2.0,
-                    width: 2.0,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-        ],
+    return Opacity(
+      opacity: _animation.value,
+      child: Container(
+        width: 2.0,
+        height: 20.0, // Match the height of your TypingIndicator
+        color: AppColors.greySub, // Assuming you have this color defined
       ),
     );
   }

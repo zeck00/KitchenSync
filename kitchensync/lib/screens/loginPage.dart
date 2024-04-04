@@ -325,7 +325,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () => AuthService().signInWithGoogle(),
+                  onTap: () => AuthService().signInWithGoogle(context),
                   child: CircleAvatar(
                     radius: propWidth(30),
                     backgroundColor: AppColors.grey2,
@@ -348,7 +348,7 @@ class _LoginPageState extends State<LoginPage> {
 
 class AuthService {
 // Google Sign In
-  signInWithGoogle() async {
+  signInWithGoogle(BuildContext context) async {
 // begin interactive sign in process
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
@@ -359,6 +359,9 @@ class AuthService {
     final credential = GoogleAuthProvider.credential(
       accessToken: gAuth.accessToken,
       idToken: gAuth.idToken,
+    );
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => MainLayout()),
     );
 // finally, lets sign in
     return await FirebaseAuth.instance.signInWithCredential(credential);
