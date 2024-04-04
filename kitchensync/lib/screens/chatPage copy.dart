@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers, sized_box_for_whitespace, unused_import
+// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors, file_names, avoid_unnecessary_containers, sized_box_for_whitespace, unused_import, unused_element
 
 import 'dart:convert';
 import 'dart:math';
@@ -21,22 +21,36 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isBotTyping = false;
   String _typingMessage = "";
   Timer? _typingTimer; // Make _typingTimer nullable
   List<Item> itemsList = [];
   String? selectedItem;
+  late AnimationController _typingAnimationController;
+  // ignore: unused_field
+  late Animation<double> _cursorAnimation;
+  bool _isBotTyping = false;
   Map<String, List<String>> responses = {};
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
-  }
-
-  Future<void> _loadInitialData() async {
-    await _loadItems();
-    await _loadResponses();
+    _typingAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _cursorAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_typingAnimationController)
+          ..addListener(() {
+            setState(() {});
+          })
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              _typingAnimationController.reverse();
+            } else if (status == AnimationStatus.dismissed) {
+              _typingAnimationController.forward();
+            }
+          });
+    _typingAnimationController.forward();
     _addInitialMessage();
   }
 
@@ -51,17 +65,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       rethrow;
       // Handle the error or show a message to the user
     }
-  }
-
-  Future<void> _loadResponses() async {
-    final String responsesString =
-        await rootBundle.loadString('assets/data/responses.json');
-    final Map<String, dynamic> responsesJson = json.decode(responsesString);
-    setState(() {
-      responses = Map.from(responsesJson['responses']).map((key, value) {
-        return MapEntry(key, List<String>.from(value));
-      });
-    });
   }
 
   void _addInitialMessage() {

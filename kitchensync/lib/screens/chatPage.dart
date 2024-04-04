@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_declarations, avoid_print
+// ignore_for_file: prefer_const_constructors, prefer_const_declarations, avoid_print, library_private_types_in_public_api, file_names, unused_import, prefer_final_fields, unused_field, unused_element
 
 import 'dart:convert';
 import 'dart:async';
@@ -9,25 +9,67 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:kitchensync/styles/size_config.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
+  late AnimationController _typingAnimationController;
+  late Animation<double> _cursorAnimation;
+  String _typingMessage = "";
+  Timer? _typingTimer;
+  bool _isBotTyping = false;
+  bool isTyping = false;
+  bool _isTypingInProgress = false;
   // Add your ChatGPT API URL here
   final String chatGPTAPIUrl = 'https://api.openai.com/v1/chat/completions';
+
+  void _simulateTyping(String message) {
+    int index = 0;
+    _typingTimer?.cancel(); // Cancel any existing timers
+    _typingTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+      if (index < message.length) {
+        _typingMessage += message[index];
+        index++;
+        if (index == message.length) {
+          _typingTimer?.cancel();
+          _isBotTyping = false; // Turn off typing indicator
+          _typingMessage = message; // Remove cursor at end
+        }
+        setState(() {}); // Trigger a rebuild
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    // Correct usage of vsync with 'this' which refers to TickerProviderStateMixin
+    _typingAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this, // Correct usage of 'this'
+    );
+    _cursorAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_typingAnimationController)
+          ..addListener(() {
+            setState(() {});
+          })
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              _typingAnimationController.reverse();
+            } else if (status == AnimationStatus.dismissed) {
+              _typingAnimationController.forward();
+            }
+          });
+    _typingAnimationController.forward();
     _addInitialMessage();
   }
 
@@ -71,8 +113,12 @@ class _ChatScreenState extends State<ChatScreen> {
         final responseData = json.decode(response.body);
         final String botReply =
             responseData['choices'][0]['message']['content'];
-        _addMessage(userMessage, 'user');
-        _addMessage(botReply, 'bot');
+
+        // Before adding the message, simulate typing
+        setState(() {
+          _isBotTyping = true;
+        });
+        _simulateBotTyping(botReply);
       } else {
         print('API call failed with status: ${response.statusCode}');
         print('Error response: ${response.body}');
@@ -92,59 +138,131 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       messages.add({"sender": sender, "content": message});
     });
-    // Ensure the list scrolls to the new message
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     }
   }
 
+  Widget _buildChatBubble(String message, bool isUser) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Align(
+        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+          decoration: BoxDecoration(
+            color: isUser ? AppColors.primary : AppColors.grey1,
+            borderRadius: isUser
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    bottomLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  )
+                : BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                    topLeft: Radius.circular(15),
+                  ),
+          ),
+          child: Text(
+            message,
+            style: isUser ? AppFonts.cardTitle : AppFonts.numbers1,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    initSizeConfig(context);
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(propHeight(120)),
+        child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  height: propHeight(28),
+                ),
+                Text(
+                  'KitchenGPT',
+                  style: AppFonts.appname,
+                  textAlign: TextAlign.center,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: propWidth(25)),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Image.asset(
+                          'assets/images/Prvs.png',
+                          height: propHeight(40),
+                          width: propWidth(40),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: propWidth(25)),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: propHeight(40),
+                        width: propWidth(40),
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
+        ),
+      ),
       body: Column(
         children: [
+          SizedBox(height: propHeight(10)),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              physics: const BouncingScrollPhysics(),
+              physics: BouncingScrollPhysics(),
               itemCount: messages.length,
               itemBuilder: (context, index) {
-                final message = messages[index];
-                final isUser = message["sender"] == "user";
-                return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.blueAccent : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      message["content"],
-                      style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black,
+                // If we reach the end and typing is in progress, show the typing indicator
+                if (index == messages.length && _isTypingInProgress) {
+                  return Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "$_typingMessage|",
+                        style: TextStyle(
+                            // Define a TextStyle for the typing indicator if necessary
+                            ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                }
+
+                // For regular messages, build chat bubbles
+                final message = messages[index];
+                final isUser = message["sender"] == "user";
+                return _buildChatBubble(message["content"], isUser);
               },
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            color: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
               children: [
                 Expanded(
@@ -153,26 +271,21 @@ class _ChatScreenState extends State<ChatScreen> {
                     decoration: InputDecoration(
                       hintText: "Type your message here...",
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: Colors.grey[200],
                       filled: true,
+                      fillColor: Colors.grey[200],
                     ),
-                    onSubmitted: (value) {
-                      if (value.trim().isNotEmpty) {
-                        _sendMessageToChatGPT(value.trim());
-                        _controller.clear();
-                      }
-                    },
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.send),
-                  color: Colors.blueAccent,
+                  icon: Icon(Icons.send),
                   onPressed: () {
-                    if (_controller.text.trim().isNotEmpty) {
-                      _sendMessageToChatGPT(_controller.text.trim());
+                    final message = _controller.text.trim();
+                    if (message.isNotEmpty) {
+                      _addMessage(message, 'user');
+                      _sendMessageToChatGPT(message);
                       _controller.clear();
                     }
                   },
@@ -180,7 +293,116 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
+          SizedBox(height: propHeight(15)),
         ],
+      ),
+    );
+  }
+
+  void _simulateBotTyping(String message) {
+    int index = 0;
+    _typingMessage = ""; // Reset the typing message
+    bool showCursor = true; // New variable to toggle cursor visibility
+
+    setState(() {
+      _isBotTyping = true; // Start showing the typing indicator
+    });
+
+    _typingTimer?.cancel(); // Cancel any existing timer
+    // Create a new periodic timer for cursor blinking
+    Timer? cursorTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      setState(() {
+        showCursor = !showCursor; // Toggle cursor visibility
+      });
+    });
+
+    _typingTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      if (index < message.length) {
+        setState(() {
+          _typingMessage =
+              message.substring(0, index + 1) + (showCursor ? "|" : "");
+          // Update the last message or add a new one with the cursor
+          if (messages.isNotEmpty && messages.last["sender"] == "bot") {
+            messages.last["content"] = _typingMessage;
+          } else {
+            messages.add({"sender": "bot", "content": _typingMessage});
+          }
+        });
+        index++;
+      } else {
+        // Once the entire message has been "typed out", stop both timers
+        timer.cancel();
+        cursorTimer.cancel(); // Stop the cursor blinking timer
+        setState(() {
+          _typingMessage = message; // Show the final message without cursor
+          _isBotTyping = false; // Hide the typing indicator
+          if (messages.isNotEmpty && messages.last["sender"] == "bot") {
+            messages.last["content"] =
+                _typingMessage; // Update last message without cursor
+          }
+        });
+        _scrollToBottom(); // Scroll to the bottom of the chat
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _typingAnimationController.dispose();
+    _typingTimer?.cancel();
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+
+class TypingIndicator extends StatefulWidget {
+  const TypingIndicator({super.key});
+
+  @override
+  _TypingIndicatorState createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          _controller.forward();
+        }
+      });
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: _animation.value,
+      child: Container(
+        width: 2.0,
+        height: 20.0, // Match the height of your TypingIndicator
+        color: AppColors.greySub, // Assuming you have this color defined
       ),
     );
   }
