@@ -10,6 +10,7 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/rippleButton.dart';
 import 'package:kitchensync/styles/size_config.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -324,6 +325,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 16),
                 GestureDetector(
+                  onTap: () => AuthService().signInWithGoogle(),
                   child: CircleAvatar(
                     radius: propWidth(30),
                     backgroundColor: AppColors.grey2,
@@ -341,5 +343,24 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+}
+
+class AuthService {
+// Google Sign In
+  signInWithGoogle() async {
+// begin interactive sign in process
+    final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+
+// obtaiin auth details from request
+    final GoogleSignInAuthentication gAuth = await gUser!.authentication;
+
+// create a new credential for user
+    final credential = GoogleAuthProvider.credential(
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
+    );
+// finally, lets sign in
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }
