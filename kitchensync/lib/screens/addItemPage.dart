@@ -1,10 +1,12 @@
-// ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables, unused_element
+// ignore_for_file: prefer_final_fields, unused_import, unnecessary_null_comparison, avoid_print, prefer_const_constructors, library_private_types_in_public_api, file_names, prefer_const_literals_to_create_immutables, unused_element, use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/backend/dataret.dart';
+import 'package:kitchensync/screens/OCRItemPage.dart';
 import 'package:kitchensync/screens/OCRPage.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
@@ -173,6 +175,8 @@ class _AddItemPageState extends State<AddItemPage> {
     _statusController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
+    _timeoutTimer?.cancel();
+    _overlayEntry?.remove();
     NfcManager.instance.stopSession();
     super.dispose();
   }
@@ -183,6 +187,7 @@ class _AddItemPageState extends State<AddItemPage> {
     loadInitialData();
   }
 
+  Timer? _timeoutTimer;
   OverlayEntry? _overlayEntry;
 
   void _showNfcReadOverlay() {
@@ -227,44 +232,126 @@ class _AddItemPageState extends State<AddItemPage> {
   void startNFCSession() async {
     bool isAvailable = await NfcManager.instance.isAvailable();
     if (!isAvailable) {
-      // Handle NFC not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.nearby_error_rounded, color: AppColors.light),
+              Text("NFC is not available on this device"),
+            ],
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
+    _showNfcReadOverlay();
+    _timeoutTimer = Timer(Duration(seconds: 10), () {
+      _updateOverlayForFailure(); // Update the overlay to show failure
+    }); // Show the overlay
 
-    _showNfcReadOverlay(); // Show the overlay
+    try {
+      await NfcManager.instance.startSession(
+        onDiscovered: (NfcTag tag) async {
+          _timeoutTimer?.cancel(); // Cancel the timer on successful read
+          final ndef = Ndef.from(tag);
+          if (ndef?.cachedMessage == null) return;
+          for (final record in ndef!.cachedMessage!.records) {
+            String recordData = String.fromCharCodes(record.payload);
+            String jsonPayload = recordData.substring(3);
+            Map<String, dynamic> data = json.decode(jsonPayload);
+            print('NFC Record Data: $recordData');
 
-    NfcManager.instance.startSession(
-      onDiscovered: (NfcTag tag) async {
-        final ndef = Ndef.from(tag);
-        if (ndef?.cachedMessage == null) return;
-        for (final record in ndef!.cachedMessage!.records) {
-          String recordData = String.fromCharCodes(record.payload);
-          String jsonPayload = recordData.substring(3);
-          Map<String, dynamic> data = json.decode(jsonPayload);
-          print('NFC Record Data: $recordData');
+            setState(() {
+              _itemNameController.text = data['itemName'] ?? '';
+              _nfcTagIdController.text = data['nfcTagId'] ?? '';
 
-          setState(() {
-            _itemNameController.text = data['itemName'] ?? '';
-            _nfcTagIdController.text = data['nfcTagId'] ?? '';
-            _pDateController.text = data['pDate'] ?? '';
-            _xDateController.text = data['xDate'] ?? '';
-            _inDateController.text = data['inDate'] ?? '';
-            _itemInfoController.text = data['itemInfo'] ?? '';
-            _statusController.text = data['status'] ?? '';
-            _quantityController.text = data['quantity'].toString();
-            _unitController.text = data['unit'] ?? '';
-            // Set dropdown values if necessary
-            // selectedKitchen = data['kitchen'];
-            // selectedDevice = data['device'];
-            selectedCategory = data['category'];
-          });
-        }
+              // Use the correct format that matches the NFC record's date format
+              if (data.containsKey('pDate') && data['pDate'].isNotEmpty) {
+                DateTime pDate = DateFormat('yyyy/MM/dd').parse(data['pDate']);
+                _pDateController.text = DateFormat('yyyy-MM-dd').format(pDate);
+                selectedPDate = pDate; // Update the selectedPDate
+              }
 
-        NfcManager.instance.stopSession();
-        // Dismiss the overlay
-        _overlayEntry?.remove();
-        _overlayEntry = null;
-      },
+              if (data.containsKey('xDate') && data['xDate'].isNotEmpty) {
+                DateTime xDate = DateFormat('yyyy/MM/dd').parse(data['xDate']);
+                _xDateController.text = DateFormat('yyyy-MM-dd').format(xDate);
+                selectedXDate = xDate; // Update the selectedXDate
+              }
+
+              _itemInfoController.text = data['itemInfo'] ?? '';
+              _statusController.text = data['status'] ?? '';
+              _quantityController.text = data['quantity'].toString();
+              selectedUnit = units.contains(data['unit']) ? data['unit'] : null;
+              selectedStatus = [
+                'Fresh',
+                'Old',
+                'Expired',
+                'Better Used Soon',
+                'Damaged'
+              ].firstWhere((status) => status == data['status'],
+                  orElse: () => 'Fresh');
+            });
+          }
+
+          NfcManager.instance.stopSession();
+          _overlayEntry?.remove();
+          _overlayEntry = null;
+        },
+        pollingOptions: {
+          NfcPollingOption.iso14443,
+          NfcPollingOption.iso15693,
+          NfcPollingOption.iso18092
+        },
+      );
+    } catch (e) {
+      _timeoutTimer?.cancel();
+      _updateOverlayForFailure();
+      print('Error: $e');
+    }
+  }
+
+  void _updateOverlayForFailure() {
+    _overlayEntry?.remove(); // Remove any existing overlay
+    _overlayEntry = _createFailureOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+
+    // Set a timer to remove the failure overlay after a duration.
+    Future.delayed(Duration(seconds: 2)).then((_) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
+  }
+
+  OverlayEntry _createFailureOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 2 - 50,
+        left: MediaQuery.of(context).size.width / 2 - 50,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.nearby_error_rounded,
+                      color: Colors.white, size: 50),
+                  SizedBox(height: propHeight(10)),
+                  Text("Couldn't Read", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

@@ -374,8 +374,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       themeMode: ThemeMode.light,
-      // Use system theme mode by default
-      title: 'Flutter Demo',
+      title: 'KitchenSync',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: lightColorScheme,

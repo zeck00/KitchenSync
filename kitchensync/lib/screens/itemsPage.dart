@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, file_names, unused_field, unused_element, avoid_function_literals_in_foreach_calls, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kitchensync/screens/OCRItemPage.dart';
 import 'package:kitchensync/screens/addItemPage.dart';
 import 'package:kitchensync/screens/chatPage.dart';
@@ -293,6 +294,14 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
               ),
               child: Column(
                 children: category.items.map<Widget>((item) {
+                  // Parse the expiration date string to a DateTime object.
+                  DateTime expiryDate =
+                      DateFormat('yyyy-MM-dd').parse(item.xDate);
+                  // Get the current date.
+                  DateTime currentDate = DateTime.now();
+                  // Calculate the difference in days between the current date and the expiration date.
+                  int difference = expiryDate.difference(currentDate).inDays;
+
                   return Slidable(
                     startActionPane: ActionPane(
                       motion: StretchMotion(),
@@ -322,7 +331,7 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
                             item.itemName,
                             style: AppFonts.servicename,
                           ),
-                          if (item.status != 'fresh')
+                          if (difference >= 0 && difference <= 5)
                             Padding(
                               padding: EdgeInsets.only(left: propWidth(8)),
                               child: Image.asset(
