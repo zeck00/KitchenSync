@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
     <!-- For Android 11 (API level 30) and above, specifying that the app needs all files access required -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
@@ -56,5 +59,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDQoQdweKyDjVD23oNKVAqGzzfu3b4fuOQ" />
     </application>
 </manifest>

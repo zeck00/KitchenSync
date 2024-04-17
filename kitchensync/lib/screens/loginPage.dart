@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kitchensync/backend/notification_manager.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/forgotPasswordPage.dart';
 import 'package:kitchensync/screens/homePage.dart';
@@ -22,12 +23,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final NotificationManager notificationManager = NotificationManager();
   // Add your state variables here if you have any
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isButtonDisabled = true; // Initial state of the login button
   bool _showEmailError = false;
   bool _showPasswordError = false;
+  void rqnotif(BuildContext context) {
+    notificationManager.requestPermissionsAndSendWelcome(context);
+  }
 
   @override
   void initState() {
@@ -108,6 +113,7 @@ class _LoginPageState extends State<LoginPage> {
         showErrorMessage(e.code); // Show the error dialog
       }
     }
+    rqnotif(context);
   }
 
   void showErrorMessage(String errorCode) {

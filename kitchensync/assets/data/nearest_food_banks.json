@@ -1,33 +1,50 @@
 [
-    {
-      "name": "UAE Food Bank",
-      "location": "Dubai, UAE",
-      "link": "https://maps.app.goo.gl/QuzzNS4abyVpqNdu8"
-    },
-    {
-      "name": "Ziad Food Bank",
-      "location": "Dubai, UAE",
-      "link": "https://maps.app.goo.gl/AFYots9WyrQdo5Qh6"
-    },
-    {
-      "name": "Awqaf Food Bank",
-      "location": "Abu Dhabi, UAE",
-      "link": "https://maps.app.goo.gl/tpQBN2PRGy6XRLxY9"
-    },
-    {
-      "name": "UAE Food Bank",
-      "location": "Dubai, UAE",
-      "link": "https://maps.app.goo.gl/VDWNfD2Pv3vwQ5fL6"
-    },
-    {
-      "name": "Charity Fridge",
-      "location": "Dubai, UAE",
-      "link": "https://maps.app.goo.gl/YpAogYe6xWQTfF777"
-    },
-    {
-      "name": "Free Food Fridge",
-      "location": "Dubai, UAE",
-      "link": "https://maps.app.goo.gl/DWwUbZN8EwwQCnsg6"
-    }
-  ]
-  
+  {
+    "name": "UAE Food Bank",
+    "location": "Dubai, UAE",
+    "link": "https://maps.app.goo.gl/QuzzNS4abyVpqNdu8",
+    "latitude": 25.2048,
+    "longitude": 55.2708,
+    "address": "Dubai, United Arab Emirates"
+  },
+  {
+    "name": "Ziad Food Bank",
+    "location": "Dubai, UAE",
+    "link": "https://maps.app.goo.gl/AFYots9WyrQdo5Qh6",
+    "latitude": 25.276987,
+    "longitude": 55.296249,
+    "address": "Sheikh Zayed Road, Dubai, United Arab Emirates"
+  },
+  {
+    "name": "Awqaf Food Bank",
+    "location": "Abu Dhabi, UAE",
+    "link": "https://maps.app.goo.gl/tpQBN2PRGy6XRLxY9",
+    "latitude": 24.4539,
+    "longitude": 54.3773,
+    "address": "Abu Dhabi, United Arab Emirates"
+  },
+  {
+    "name": "UAE Food Bank",
+    "location": "Dubai, UAE",
+    "link": "https://maps.app.goo.gl/VDWNfD2Pv3vwQ5fL6",
+    "latitude": 25.2048,
+    "longitude": 55.2708,
+    "address": "Al Maktoum Rd, Dubai, United Arab Emirates"
+  },
+  {
+    "name": "Charity Fridge",
+    "location": "Dubai, UAE",
+    "link": "https://maps.app.goo.gl/YpAogYe6xWQTfF777",
+    "latitude": 25.204850,
+    "longitude": 55.270850,
+    "address": "Business Bay, Dubai, United Arab Emirates"
+  },
+  {
+    "name": "Free Food Fridge",
+    "location": "Dubai, UAE",
+    "link": "https://maps.app.goo.gl/DWwUbZN8EwwQCnsg6",
+    "latitude": 25.204851,
+    "longitude": 55.270851,
+    "address": "Jumeirah, Dubai, United Arab Emirates"
+  }
+]

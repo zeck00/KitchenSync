@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:kitchensync/backend/dataret.dart';
+import 'package:kitchensync/screens/mapPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/appBar.dart';
@@ -69,10 +70,23 @@ class DonateScreen extends StatelessWidget {
             ),
             SizedBox(height: propHeight(20)),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Nearest Food Banks',
                   style: AppFonts.servicename,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MapPage()),
+                    );
+                  },
+                  child: Image.asset('assets/images/Next.png',
+                      color: AppColors.dark,
+                      height: propHeight(30),
+                      width: propWidth(30)),
                 ),
               ],
             ),

@@ -96,6 +96,49 @@ class _EditItemPageState extends State<EditItemPage> {
     //   await file.writeAsString(updatedJson);
   }
 
+  Future<File> get _localFile async {
+    final directory =
+        await getApplicationDocumentsDirectory(); // Gets the directory where your app can store files.
+    final path = directory.path; // Gets the full path of that directory.
+    return File(
+        '$path/items.json'); // Creates and returns a File instance pointing to 'items.json' in that directory.
+  }
+
+  Future<void> updateItem(Item updatedItem) async {
+    final file = await _localFile;
+
+    try {
+      List<dynamic> itemsList = [];
+      // Check if the file exists and has content
+      if (await file.exists() && await file.readAsString() != '') {
+        final contents = await file.readAsString();
+        final decoded = json.decode(contents);
+        if (decoded is Map<String, dynamic> && decoded.containsKey('items')) {
+          itemsList = decoded['items'] as List;
+        }
+      }
+
+      // Find and replace the updated item
+      int index =
+          itemsList.indexWhere((item) => item['itemID'] == updatedItem.itemID);
+      if (index != -1) {
+        itemsList[index] = updatedItem.toJson();
+      } else {
+        // If the item is not found, just add it (or handle this case differently)
+        itemsList.add(updatedItem.toJson());
+      }
+
+      // Prepare the data in the expected structure
+      final Map<String, dynamic> updatedData = {"items": itemsList};
+
+      // Write the updated data back to the file
+      await file.writeAsString(json.encode(updatedData));
+      print("Item updated successfully: ${updatedItem.itemName}");
+    } catch (e) {
+      print("Error updating items.json: $e");
+    }
+  }
+
   void editItem() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -115,7 +158,7 @@ class _EditItemPageState extends State<EditItemPage> {
         unit: _unitController.text,
       );
 
-      // updateItem(updatedItem);
+      updateItem(updatedItem);
 
       // Show a success message or take other appropriate action
       _showCustomOverlay(context, "${updatedItem.itemName} Edited");
@@ -197,7 +240,7 @@ class _EditItemPageState extends State<EditItemPage> {
 
   Future<void> fetchInitialData() async {
     try {
-      kitchens = await Kitchen.fetchKitchens('assets/data/kitchens.json');
+      kitchens = await Kitchen.fetchKitchens('kitchens.json');
       if (kitchens.isNotEmpty) {
         // Select the first kitchen by default
         selectedKitchen = kitchens.first.kitchenID;

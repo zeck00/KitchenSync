@@ -72,6 +72,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
       category.assignItems(allItems);
     }
 
+    for (Item item in allItems) {
+      await item.scheduleExpiryNotifications();
+    }
     setState(() {
       categories = loadedCategories;
       _isLoading = false;

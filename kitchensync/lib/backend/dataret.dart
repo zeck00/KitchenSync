@@ -3,12 +3,15 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:kitchensync/backend/const.dart';
+import 'package:kitchensync/backend/notification_manager.dart';
 import 'package:kitchensync/main.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 // This function will get the file from the local directory if it exists,
 // otherwise it will copy it from the assets into the local directory.
@@ -204,6 +207,16 @@ class Category {
         .toList();
   }
 
+  DateTime parseExpiryDate(String dateString) {
+    try {
+      final DateFormat formatter = DateFormat('yyyy-MM-dd');
+      return formatter.parseStrict(dateString);
+    } catch (e) {
+      print("Error parsing date: $e");
+      return DateTime(2099, 1, 1); // Or handle the error as appropriate
+    }
+  }
+
   Future<void> loadItems(String itemsFilePath) async {
     final itemsJson = await loadJson(itemsFilePath);
     final List<dynamic> jsonItems = itemsJson['items'];
@@ -212,6 +225,11 @@ class Category {
         .where((item) => item['category'] == categoryName)
         .map((item) => Item.fromJson(item))
         .toList();
+
+    for (var item in items) {
+      NotificationManager()
+          .scheduleItemExpiryNotifications(parseExpiryDate(item.xDate));
+    }
   }
 }
 
@@ -219,14 +237,27 @@ class FoodBank {
   final String name;
   final String location;
   final String link;
+  final double longitude;
+  final double latitude;
+  final String address;
 
-  FoodBank({required this.name, required this.location, required this.link});
+  FoodBank({
+    required this.name,
+    required this.location,
+    required this.link,
+    required this.latitude,
+    required this.longitude,
+    required this.address,
+  });
 
   factory FoodBank.fromJson(Map<String, dynamic> json) {
     return FoodBank(
-      name: json['name'] as String,
-      location: json['location'] as String,
-      link: json['link'] as String,
+      name: json['name'] as String? ?? 'Unknown Name',
+      location: json['location'] as String? ?? 'Unknown Location',
+      link: json['link'] as String? ?? 'No Link Available',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      address: json['address'] as String? ?? 'No Address Available',
     );
   }
 
@@ -235,6 +266,40 @@ class FoodBank {
         await rootBundle.loadString('assets/data/nearest_food_banks.json');
     final jsonResponse = json.decode(jsonString) as List<dynamic>;
     return jsonResponse.map((data) => FoodBank.fromJson(data)).toList();
+  }
+
+  static Future<List<FoodBank>> fetchFoodBanks(
+      double latitude, double longitude) async {
+    const apiKey = ApiKeys.gMaps; // Ensure this is securely loaded as mentioned
+    final url =
+        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=5000&keyword=bank&key=$apiKey';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> results = json.decode(response.body)['results'];
+      return results.map((data) {
+        var location = data['geometry']['location'];
+        var name = data['name'] as String;
+        var vicinity = data['vicinity'] as String; // Typically used for address
+
+        return FoodBank(
+          name: name,
+          location:
+              vicinity, // Using 'vicinity' as 'location' which often is the address
+          link:
+              "https://maps.google.com/?q=${location['lat']},${location['lng']}",
+          latitude: location['lat'].toDouble(),
+          longitude: location['lng'].toDouble(),
+          address:
+              vicinity, // Same as location, adjust if there's a better field
+        );
+      }).toList();
+    } else {
+      print('Failed to load food banks. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      throw Exception(
+          'Failed to load food banks. Status code: ${response.statusCode}');
+    }
   }
 }
 
@@ -279,6 +344,13 @@ class Item {
       quantity: data['quantity'] ?? 0,
       unit: data['unit'] ?? 'Unknown Unit',
     );
+  }
+
+  DateTime get parsedExpiryDate => _parseDate(xDate);
+  // Schedule notifications for this item
+  Future<void> scheduleExpiryNotifications() async {
+    NotificationManager notificationManager = NotificationManager();
+    await notificationManager.scheduleItemExpiryNotifications(parsedExpiryDate);
   }
 
   static DateTime _parseDate(String? dateStr) {
@@ -381,29 +453,29 @@ class Item {
     }
   }
 
-  Future<void> scheduleExpirationNotifications() async {
-    final now = tz.TZDateTime.now(tz.local);
-    final expiration = tz.TZDateTime.from(exDate, tz.local);
+  // Future<void> scheduleExpirationNotifications() async {
+  //   final now = tz.TZDateTime.now(tz.local);
+  //   final expiration = tz.TZDateTime.from(exDate, tz.local);
 
-    // Check if the expiration date is in the future
-    if (expiration.isAfter(now)) {
-      final difference = expiration.difference(now).inDays;
-      // Schedule notifications for 5, 3, 2, 1, and 0 days before expiration
-      if (difference <= 5) {
-        if (difference >= 1) {
-          // Schedule a notification for each day
-          for (var i = difference; i >= 1; i--) {
-            await scheduleNotification(i, itemName, itemID);
-          }
-        } else {
-          // Schedule for the day of expiration
-          await scheduleNotification(0, itemName, itemID);
-          // Schedule a second notification for recipes after 10 minutes
-          // await scheduleRecipeSuggestion(itemName);
-        }
-      }
-    }
-  }
+  //   // Check if the expiration date is in the future
+  //   if (expiration.isAfter(now)) {
+  //     final difference = expiration.difference(now).inDays;
+  //     // Schedule notifications for 5, 3, 2, 1, and 0 days before expiration
+  //     if (difference <= 5) {
+  //       if (difference >= 1) {
+  //         // Schedule a notification for each day
+  //         for (var i = difference; i >= 1; i--) {
+  //           await scheduleNotification(i, itemName, itemID);
+  //         }
+  //       } else {
+  //         // Schedule for the day of expiration
+  //         await scheduleNotification(0, itemName, itemID);
+  //         // Schedule a second notification for recipes after 10 minutes
+  //         // await scheduleRecipeSuggestion(itemName);
+  //       }
+  //     }
+  //   }
+  // }
 
   Future<void> delete() async {
     // Get the path to the file

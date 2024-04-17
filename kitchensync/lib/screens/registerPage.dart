@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kitchensync/backend/notification_manager.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/loginPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
@@ -19,10 +20,15 @@ class registerPage extends StatefulWidget {
 }
 
 class _registerPageState extends State<registerPage> {
+  final NotificationManager notificationManager = NotificationManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _conpasswordController = TextEditingController();
   late ConfettiController _confettiController;
+
+  void rqnotif(BuildContext context) {
+    notificationManager.requestPermissionsAndSendWelcome(context);
+  }
 
   bool _showEmailError = false;
   bool _showPasswordError = false;
@@ -71,6 +77,7 @@ class _registerPageState extends State<registerPage> {
       showErrorMessage(
           e.code); // This function should be implemented to handle errors.
     }
+    rqnotif(context);
   }
 
   void showErrorMessage(String errorCode) {
@@ -208,6 +215,7 @@ class _registerPageState extends State<registerPage> {
   @override
   void initState() {
     super.initState();
+    notificationManager.initNotifications();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 1));
   }
