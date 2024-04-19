@@ -6,6 +6,7 @@ import 'package:kitchensync/screens/loginPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/size_config.dart';
+import 'package:quickalert/quickalert.dart';
 
 class forgotPasswordPage extends StatefulWidget {
   const forgotPasswordPage({super.key});
@@ -40,37 +41,23 @@ class _forgotPasswordPageState extends State<forgotPasswordPage> {
       await FirebaseAuth.instance
           .sendPasswordResetEmail(email: _emailController.text.trim());
       // Show success dialog
-      await showDialog(
+      await QuickAlert.show(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            elevation: 20,
-            shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(propWidth(17))),
-            title: Text(
-              'Success',
-              textAlign: TextAlign.center,
-              style: AppFonts.appname,
-            ),
-            content: Text(
-              'Password Reset Link Sent! Check Your Email.',
-              textAlign: TextAlign.center,
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(
-                  'OK',
-                  style: AppFonts.appname,
-                ),
-                onPressed: () {
-                  Navigator.of(context)
-                      .pop(); // Close the dialog and return to login screen
-                },
-              ),
-            ],
-          );
+        type: QuickAlertType.success,
+        title: 'Success',
+        backgroundColor: AppColors.light,
+        text: 'Password Reset Link Sent! Check Your Email.',
+        barrierDismissible: false,
+        animType: QuickAlertAnimType.slideInUp,
+        confirmBtnColor: AppColors.primary,
+        confirmBtnText: 'Ok',
+        confirmBtnTextStyle: AppFonts.cardTitle,
+        onConfirmBtnTap: () {
+          Navigator.of(context)
+              .pop(); // Close the dialog and return to login screen
         },
       );
+
       // After the dialog is dismissed, navigate to login page
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -78,10 +65,18 @@ class _forgotPasswordPageState extends State<forgotPasswordPage> {
     } on FirebaseAuthException catch (e) {
       // Handle errors and stay on the reset password page
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(propHeight(17))),
         backgroundColor: AppColors.red,
-        content: Text(
-          'Failed to send email! ${e.message}',
-          style: AppFonts.cntrstText,
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Icon(Icons.cancel_rounded, color: Colors.white),
+            Text(
+              '${e.message}',
+              style: AppFonts.cntrstText,
+            ),
+          ],
         ),
       ));
     }

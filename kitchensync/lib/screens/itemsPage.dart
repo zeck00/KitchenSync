@@ -10,6 +10,7 @@ import 'package:kitchensync/screens/editItemPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/size_config.dart';
+import 'package:quickalert/quickalert.dart';
 import 'dart:ui' as ui;
 import '../backend/dataret.dart';
 import 'inventoryPage.dart';
@@ -189,31 +190,46 @@ class _CustomExpansionTileState extends State<CustomExpansionTile> {
 
   void _deleteItem(Item item) async {
     // Show confirmation dialog
-    final confirm = await showDialog<bool>(
+    final confirm = await QuickAlert.show(
       context: context,
-      builder: (context) => BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Center(
-          child: AlertDialog(
-            shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(propWidth(17))),
-            backgroundColor: AppColors.light,
-            title: Text('Delete Item'),
-            content: Text('Are you sure you want to delete this item?'),
-            actions: [
-              TextButton(
-                child: Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              TextButton(
-                child: Text('Delete', style: TextStyle(color: AppColors.red)),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
-        ),
-      ),
+      type: QuickAlertType.confirm,
+      title: 'Delete Item',
+      backgroundColor: AppColors.light,
+      text: 'Are you sure you want to delete the item?',
+      barrierDismissible: false,
+      cancelBtnText: 'Cancel',
+      confirmBtnText: 'Delete',
+      confirmBtnColor: AppColors.primary,
+      onCancelBtnTap: () => Navigator.of(context).pop(false),
+      onConfirmBtnTap: () => Navigator.of(context).pop(true),
+      animType: QuickAlertAnimType.slideInUp,
     );
+
+    // await showDialog<bool>(
+    //   context: context,
+    //   builder: (context) => BackdropFilter(
+    //     filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+    //     child: Center(
+    //       child: AlertDialog(
+    //         shape: ContinuousRectangleBorder(
+    //             borderRadius: BorderRadius.circular(propWidth(17))),
+    //         backgroundColor: AppColors.light,
+    //         title: Text('Delete Item'),
+    //         content: Text('Are you sure you want to delete this item?'),
+    //         actions: [
+    //           TextButton(
+    //             child: Text('Cancel'),
+    //             onPressed: () => Navigator.of(context).pop(false),
+    //           ),
+    //           TextButton(
+    //             child: Text('Delete', style: TextStyle(color: AppColors.red)),
+    //             onPressed: () => Navigator.of(context).pop(true),
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    // );
 
     // If deletion is confirmed
     if (confirm == true) {

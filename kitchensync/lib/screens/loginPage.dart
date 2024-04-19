@@ -6,12 +6,14 @@ import 'package:kitchensync/backend/notification_manager.dart';
 import 'package:kitchensync/screens/bottomNavBar.dart';
 import 'package:kitchensync/screens/forgotPasswordPage.dart';
 import 'package:kitchensync/screens/homePage.dart';
+import 'package:kitchensync/screens/mapPage.dart';
 import 'package:kitchensync/screens/registerPage.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/rippleButton.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:quickalert/quickalert.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -69,32 +71,21 @@ class _LoginPageState extends State<LoginPage> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    showDialog(
-      barrierDismissible: false,
+    // showDialog(
+    //   barrierDismissible: false,
+    //   context: context,
+    //   builder: (context) {
+    //     return loadingIndicator();
+    //   },
+    // );
+    QuickAlert.show(
       context: context,
-      builder: (context) {
-        return Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Outer larger circle
-              CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.lightBlueAccent),
-                strokeWidth: 8,
-                backgroundColor: Colors.grey[300],
-              ),
-              // Inner smaller circle
-              CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                strokeWidth: 4,
-              ),
-            ],
-          ),
-        );
-      },
+      type: QuickAlertType.loading,
+      title: 'Loading',
+      backgroundColor: AppColors.light,
+      text: 'We\'re fetching your data',
+      barrierDismissible: false,
+      animType: QuickAlertAnimType.slideInUp,
     );
 
     try {
@@ -122,53 +113,68 @@ class _LoginPageState extends State<LoginPage> {
     if (errorCode == 'user-not-found') {
       errorMessage = 'No user found for that email.';
     } else if (errorCode == 'wrong-password') {
-      errorMessage = 'Wrong password provided for that user.';
+      errorMessage = 'Wrong password provided for user.';
     } else {
       errorMessage = 'An unexpected error occurred.';
     }
 
     if (mounted) {
-      showDialog(
+      QuickAlert.show(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            elevation: 20,
-            shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(propWidth(17))),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Login Error',
-                  style: AppFonts.warning,
-                ),
-              ],
-            ),
-            content: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [Text(errorMessage)]),
-            actions: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextButton(
-                    child: Text(
-                      'OK',
-                      style: AppFonts.appname,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                  ),
-                ],
-              ),
-            ],
-          );
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        backgroundColor: AppColors.light,
+        confirmBtnTextStyle: AppFonts.appname,
+        confirmBtnColor: AppColors.grey2,
+        onConfirmBtnTap: () {
+          Navigator.of(context).pop();
         },
+        text: errorMessage,
+        barrierDismissible: true,
+        confirmBtnText: 'Ok',
+        animType: QuickAlertAnimType.slideInUp,
       );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       elevation: 20,
+      //       shape: ContinuousRectangleBorder(
+      //           borderRadius: BorderRadius.circular(propWidth(17))),
+      //       title: Row(
+      //         mainAxisAlignment: MainAxisAlignment.center,
+      //         crossAxisAlignment: CrossAxisAlignment.center,
+      //         children: [
+      //           Text(
+      //             'Login Error',
+      //             style: AppFonts.warning,
+      //           ),
+      //         ],
+      //       ),
+      //       content: Row(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           crossAxisAlignment: CrossAxisAlignment.center,
+      //           children: [Text(errorMessage)]),
+      //       actions: <Widget>[
+      //         Row(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           crossAxisAlignment: CrossAxisAlignment.center,
+      //           children: [
+      //             TextButton(
+      //               child: Text(
+      //                 'OK',
+      //                 style: AppFonts.appname,
+      //               ),
+      //               onPressed: () {
+      //                 Navigator.of(context).pop(); // Close the dialog
+      //               },
+      //             ),
+      //           ],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
     }
   }
 

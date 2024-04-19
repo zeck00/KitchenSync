@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import, file_names, library_private_types_in_public_api, prefer_final_fields, prefer_const_constructors, sized_box_for_whitespace, no_leading_underscores_for_local_identifiers, avoid_print, prefer_const_literals_to_create_immutables, deprecated_member_use, use_build_context_synchronously
 
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:location/location.dart';
+import 'package:quickalert/quickalert.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -124,7 +126,6 @@ class _MapPageState extends State<MapPage> {
                     compassEnabled: true,
                     liteModeEnabled: false,
                     myLocationButtonEnabled: true,
-                    myLocationEnabled: true,
                     initialCameraPosition: CameraPosition(
                       target:
                           _currentLocation, // Updated to use _currentLocation
@@ -148,7 +149,7 @@ class _MapPageState extends State<MapPage> {
                       builder: (context, scrollController) {
                         return Container(
                           decoration: BoxDecoration(
-                            color: AppColors.grey2,
+                            color: AppColors.light,
                             borderRadius:
                                 BorderRadius.vertical(top: Radius.circular(16)),
                           ),
@@ -197,63 +198,74 @@ class _MapPageState extends State<MapPage> {
                                           final url = _createGoogleMapsUrl(
                                               foodBanks[index].latitude,
                                               foodBanks[index].longitude);
-                                          showDialog(
+                                          QuickAlert.show(
                                             context: context,
-                                            builder: (context) =>
-                                                BackdropFilter(
-                                              filter: ui.ImageFilter.blur(
-                                                  sigmaX: 5, sigmaY: 5),
-                                              child: AlertDialog(
-                                                shape:
-                                                    ContinuousRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    propWidth(
-                                                                        17))),
-                                                backgroundColor:
-                                                    AppColors.light,
-                                                title:
-                                                    Text(foodBanks[index].name),
-                                                content: Text(
-                                                    "Address: ${foodBanks[index].address}"),
-                                                actions: [
-                                                  TextButton(
-                                                    child: Text('Navigate'),
-                                                    onPressed: () async {
-                                                      if (await canLaunch(
-                                                          url)) {
-                                                        await launch(url);
-                                                      } else {
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                                SnackBar(
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .red,
-                                                                    content:
-                                                                        Text(
-                                                                      "Could not open the map.",
-                                                                      style: AppFonts
-                                                                          .locCard,
-                                                                    )));
-                                                      }
-                                                    },
-                                                  ),
-                                                  TextButton(
-                                                    child: Text('Cancel',
-                                                        style: TextStyle(
-                                                            color:
-                                                                AppColors.red)),
-                                                    onPressed: () =>
-                                                        Navigator.of(context)
-                                                            .pop(true),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                            type: QuickAlertType.confirm,
+                                            title: foodBanks[index].name,
+                                            backgroundColor: AppColors.light,
+                                            cancelBtnText: 'No',
+                                            text:
+                                                "Address: ${foodBanks[index].address}",
+                                            confirmBtnText: "Navigate!",
+                                            barrierDismissible: true,
+                                            confirmBtnColor: AppColors.primary,
+                                            confirmBtnTextStyle:
+                                                AppFonts.numbers,
+                                            animType:
+                                                QuickAlertAnimType.slideInUp,
+                                            onConfirmBtnTap: () async {
+                                              if (await canLaunch(url)) {
+                                                await launch(url);
+                                              } else {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                        content: Text(
+                                                          "Could not open the map.",
+                                                          style:
+                                                              AppFonts.locCard,
+                                                        )));
+                                              }
+                                            },
                                           );
+                                          // showDialog(
+                                          //   context: context,
+                                          //   builder: (context) =>
+                                          //       BackdropFilter(
+                                          //     filter: ui.ImageFilter.blur(
+                                          //         sigmaX: 5, sigmaY: 5),
+                                          //     child: AlertDialog(
+                                          //       shape:
+                                          //           ContinuousRectangleBorder(
+                                          //               borderRadius:
+                                          //                   BorderRadius
+                                          //                       .circular(
+                                          //                           propWidth(
+                                          //                               17))),
+                                          //       backgroundColor:
+                                          //           AppColors.light,
+                                          //       title:
+                                          //           Text(foodBanks[index].name),
+                                          //       content: Text(
+                                          //           "Address: ${foodBanks[index].address}"),
+                                          //       actions: [
+                                          //         TextButton(
+                                          //             child: Text('Navigate'),
+                                          //             onPressed: () {}),
+                                          //         TextButton(
+                                          //           child: Text('Cancel',
+                                          //               style: TextStyle(
+                                          //                   color:
+                                          //                       AppColors.red)),
+                                          //           onPressed: () =>
+                                          //               Navigator.of(context)
+                                          //                   .pop(true),
+                                          //         ),
+                                          //       ],
+                                          //     ),
+                                          //   ),
+                                          // );
                                         },
                                       ),
                                     );
@@ -270,37 +282,37 @@ class _MapPageState extends State<MapPage> {
               )
             : loadingIndicator(),
         Positioned(
-          top: propHeight(20), // Adjust this value to position it as needed
+          top: propHeight(30), // Adjust this value to position it as needed
           left: 0,
           right: 0,
-          child: Text(
-            "KitchenSync",
-            textAlign: TextAlign.center,
-            style: AppFonts.appname,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              SizedBox(
+                width: propWidth(15),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Image.asset(
+                  'assets/images/Prvs.png',
+                  height: propHeight(35),
+                  color: AppColors.dark,
+                  width: propWidth(35),
+                ),
+              ),
+              Expanded(child: Container()),
+              Text(
+                "KitchenSync",
+                textAlign: TextAlign.center,
+                style: AppFonts.appname,
+              ),
+              SizedBox(
+                width: propWidth(15),
+              )
+            ],
           ),
         ),
       ]),
-    );
-  }
-
-  Widget loadingIndicator() {
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            strokeCap: StrokeCap.square,
-            strokeWidth: 8,
-            backgroundColor: Colors.grey[300],
-          ),
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.green),
-            strokeWidth: 4,
-            strokeCap: StrokeCap.square,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -308,4 +320,25 @@ class _MapPageState extends State<MapPage> {
 String _createGoogleMapsUrl(double lat, double lng) {
   // Creates a URL that opens Google Maps with directions to the given coordinates
   return 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving';
+}
+
+Widget loadingIndicator() {
+  return Center(
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          strokeCap: StrokeCap.round,
+          strokeWidth: 8,
+          backgroundColor: Colors.grey[300],
+        ),
+        CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.green),
+          strokeWidth: 4,
+          strokeCap: StrokeCap.round,
+        ),
+      ],
+    ),
+  );
 }

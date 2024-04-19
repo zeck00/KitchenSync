@@ -181,13 +181,13 @@ class OnboardingContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     initSizeConfig(context); // Make sure you call this if needed
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Expanded(child: Container()),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(propHeight(17)),
-            color: AppColors.grey2,
+            color: AppColors.grey2.withAlpha(0),
           ),
           alignment: Alignment.center,
           height: propHeight(600),
@@ -205,7 +205,6 @@ class OnboardingContentWidget extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(child: Container()),
         Column(children: [
           Text(title, style: AppFonts.onBoardtxt),
           Text(description, style: AppFonts.onBoardtxt1)

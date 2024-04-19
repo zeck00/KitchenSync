@@ -97,6 +97,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                           )),
                     ),
+                    SizedBox(height: propHeight(15)),
                     GestureDetector(
                       onTap: () => navigateToLogin(context),
                       child: Row(

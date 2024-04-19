@@ -7,6 +7,7 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/size_config.dart';
+import 'package:quickalert/quickalert.dart';
 import 'dart:ui' as ui;
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -310,38 +311,46 @@ class _PopupRoute extends PopupRoute {
     Animation<double> secondaryAnimation,
   ) {
     return BackdropFilter(
-      filter: ui.ImageFilter.blur(
-        sigmaX: 12.0,
-        sigmaY: 12.0,
-      ),
+      filter: ui.ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
       child: Material(
         type: MaterialType.transparency,
         child: Center(
           child: ClipRect(
             child: Padding(
               padding: const EdgeInsets.all(25),
-              child: ListView(
-                shrinkWrap: true,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Center(
-                      child: Text(
-                    "Confirm Scheduling?",
-                    style: AppFonts.welcomemsg2,
-                  )),
-                  SizedBox(height: propHeight(25)),
+                      child: Text("Confirm Scheduling?",
+                          style: AppFonts.welcomemsg2)),
+                  SizedBox(height: 20),
                   InkWell(
-                    onTap: () => _showCustomOverlay(context),
+                    onTap: () async {
+                      // Close this confirmation dialog
+                      Navigator.of(context).pop();
+                      // Show the success alert
+                      await QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.success,
+                        title: 'Success',
+                        text:
+                            'Donation Scheduled! The pickup team should contact you soon.',
+                        confirmBtnText: 'Ok',
+                        confirmBtnColor: AppColors.primary,
+                      );
+                    },
                     child: Container(
-                      width: propWidth(50),
-                      height: propHeight(50),
+                      width: 160,
+                      height: 50,
                       decoration: BoxDecoration(
-                        color: AppColors.green,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
                         child: Text(
                           'Confirm',
-                          style: AppFonts.appname,
+                          style: AppFonts.cntrstText,
                         ),
                       ),
                     ),
@@ -354,51 +363,4 @@ class _PopupRoute extends PopupRoute {
       ),
     );
   }
-}
-
-void _showCustomOverlay(BuildContext context) {
-  OverlayEntry overlayEntry = _createOverlayEntry(context);
-  Overlay.of(context).insert(overlayEntry);
-
-  // Wait for 2 seconds and remove the overlay
-  Future.delayed(Duration(milliseconds: 1250))
-      .then((_) => overlayEntry.remove());
-  Future.delayed(Duration(milliseconds: 1000))
-      .then((_) => Navigator.of(context).pop());
-}
-
-OverlayEntry _createOverlayEntry(BuildContext context) {
-  return OverlayEntry(
-    builder: (context) => Positioned(
-      top: MediaQuery.of(context).size.height * 0.45,
-      left: MediaQuery.of(context).size.width * 0.055,
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          alignment: Alignment.center,
-          width: MediaQuery.of(context).size.width * 0.90,
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(17),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: AppColors.light,
-                child: Icon(Icons.check, size: 50, color: AppColors.primary),
-              ),
-              SizedBox(height: propHeight(10)),
-              Text(
-                'Added To Schedule',
-                style: AppFonts.locCard,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
 }

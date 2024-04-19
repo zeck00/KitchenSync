@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unused_import, prefer_const_constructors
+// ignore_for_file: deprecated_member_use, unused_import, prefer_const_constructors, avoid_print
 
 /*
 _loadItemsAndScheduleNotifications(context);
@@ -189,6 +189,9 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:kitchensync/styles/AppColors.dart';
+import 'package:quickalert/quickalert.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -344,20 +347,32 @@ class NotificationManager {
       );
     } else {
       // Handle the case where permission is denied
-      showDialog(
+      QuickAlert.show(
         context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: Text("Notification Permission"),
-          content: Text(
-              "Notification permission was denied. Enable it from settings to receive important updates."),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
+        type: QuickAlertType.warning,
+        title: 'Notification Permission',
+        backgroundColor: AppColors.light,
+        text:
+            "Notification permission was denied. Enable it from settings to receive important updates.",
+        barrierDismissible: true,
+        animType: QuickAlertAnimType.slideInUp,
+        cancelBtnText: 'Ok',
+        onCancelBtnTap: () => Navigator.of(context).pop(),
       );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) => AlertDialog(
+      //     title: Text(""),
+      //     content: Text(
+      //         "Notification permission was denied. Enable it from settings to receive important updates."),
+      //     actions: <Widget>[
+      //       TextButton(
+      //         child: Text("OK"),
+      //         onPressed: () => Navigator.of(context).pop(),
+      //       ),
+      //     ],
+      //   ),
+      // );
     }
   }
 

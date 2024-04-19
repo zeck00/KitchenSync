@@ -9,6 +9,7 @@ import 'package:kitchensync/styles/AppColors.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:confetti/confetti.dart';
+import 'package:quickalert/quickalert.dart';
 
 class registerPage extends StatefulWidget {
   const registerPage({
@@ -92,47 +93,62 @@ class _registerPageState extends State<registerPage> {
     }
 
     if (mounted) {
-      showDialog(
+      QuickAlert.show(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            elevation: 20,
-            shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(propWidth(17))),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Registration Error',
-                  style: AppFonts.warning,
-                ),
-              ],
-            ),
-            content: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [Text(errorMessage)]),
-            actions: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextButton(
-                    child: Text(
-                      'OK',
-                      style: AppFonts.appname,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                  ),
-                ],
-              ),
-            ],
-          );
+        type: QuickAlertType.error,
+        title: 'Oops...',
+        backgroundColor: AppColors.light,
+        confirmBtnTextStyle: AppFonts.appname,
+        confirmBtnColor: AppColors.grey2,
+        onConfirmBtnTap: () {
+          Navigator.of(context).pop();
         },
+        text: errorMessage,
+        barrierDismissible: true,
+        confirmBtnText: 'Ok',
+        animType: QuickAlertAnimType.slideInUp,
       );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       elevation: 20,
+      //       shape: ContinuousRectangleBorder(
+      //           borderRadius: BorderRadius.circular(propWidth(17))),
+      //       title: Row(
+      //         mainAxisAlignment: MainAxisAlignment.center,
+      //         crossAxisAlignment: CrossAxisAlignment.center,
+      //         children: [
+      //           Text(
+      //             'Registration Error',
+      //             style: AppFonts.warning,
+      //           ),
+      //         ],
+      //       ),
+      //       content: Row(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           crossAxisAlignment: CrossAxisAlignment.center,
+      //           children: [Text(errorMessage)]),
+      //       actions: <Widget>[
+      //         Row(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           crossAxisAlignment: CrossAxisAlignment.center,
+      //           children: [
+      //             TextButton(
+      //               child: Text(
+      //                 'OK',
+      //                 style: AppFonts.appname,
+      //               ),
+      //               onPressed: () {
+      //                 Navigator.of(context).pop(); // Close the dialog
+      //               },
+      //             ),
+      //           ],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
     }
   }
 
