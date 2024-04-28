@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unused_import, prefer_const_constructors, avoid_print
+// ignore_for_file: deprecated_member_use, unused_import, prefer_const_constructors, avoid_print, use_build_context_synchronously, non_constant_identifier_names
 
 /*
 _loadItemsAndScheduleNotifications(context);
@@ -188,10 +188,10 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kitchensync/styles/AppColors.dart';
 import 'package:quickalert/quickalert.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -218,7 +218,7 @@ class NotificationManager {
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
+    await FirebaseAPI().initFirebaseNotis();
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
         'kitchen_sync_channel', 'Item Expiration Notifications',
         description: 'Channel for Item Expiry Notifications',
@@ -359,20 +359,6 @@ class NotificationManager {
         cancelBtnText: 'Ok',
         onCancelBtnTap: () => Navigator.of(context).pop(),
       );
-      // showDialog(
-      //   context: context,
-      //   builder: (BuildContext context) => AlertDialog(
-      //     title: Text(""),
-      //     content: Text(
-      //         "Notification permission was denied. Enable it from settings to receive important updates."),
-      //     actions: <Widget>[
-      //       TextButton(
-      //         child: Text("OK"),
-      //         onPressed: () => Navigator.of(context).pop(),
-      //       ),
-      //     ],
-      //   ),
-      // );
     }
   }
 
@@ -397,4 +383,69 @@ class NotificationManager {
   }
 
   NotificationManager.scheduleWelcomeNotification();
+}
+
+class FirebaseAPI {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  // Initialize notification settings
+  Future<void> initFirebaseNotis() async {
+    // Getting the token for the device
+    final FCMToken = await _firebaseMessaging.getToken();
+    print('Token is: $FCMToken');
+
+    // Create a channel (Android only)
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'high_importance_channel', // ID
+      'High Importance Notifications', // Title
+      description:
+          'This channel is used for important notifications.', // Description
+      importance: Importance.high,
+      enableLights: true,
+      enableVibration: true,
+      playSound: true,
+      ledColor: AppColors.green,
+      showBadge: true,
+    );
+
+    await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Set up the channel
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              channelDescription: channel.description,
+              // Add other properties if needed
+            ),
+          ),
+        );
+        print('working MF!');
+      }
+    });
+
+    // Handle messages when the app is in background but not terminated
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+    });
+  }
 }
