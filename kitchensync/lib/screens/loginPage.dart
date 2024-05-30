@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, file_names, unused_field, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, file_names, unused_field, use_build_context_synchronously, avoid_print
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -360,22 +360,39 @@ class _LoginPageState extends State<LoginPage> {
 
 class AuthService {
 // Google Sign In
-  signInWithGoogle(BuildContext context) async {
-// begin interactive sign in process
-    final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+  // Google Sign In
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      // Begin interactive sign-in process
+      final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
-// obtaiin auth details from request
-    final GoogleSignInAuthentication gAuth = await gUser!.authentication;
+      // Check if the sign-in was aborted by the user
+      if (gUser == null) {
+        // Handle the situation where the user cancelled the sign-in
+        print('Google sign-in was cancelled by the user.');
+        return;
+      }
 
-// create a new credential for user
-    final credential = GoogleAuthProvider.credential(
-      accessToken: gAuth.accessToken,
-      idToken: gAuth.idToken,
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => MainLayout()),
-    );
-// finally, lets sign in
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+      // Obtain auth details from the sign-in request
+      final GoogleSignInAuthentication gAuth = await gUser.authentication;
+
+      // Create a new credential for the user
+      final credential = GoogleAuthProvider.credential(
+        accessToken: gAuth.accessToken,
+        idToken: gAuth.idToken,
+      );
+
+      // Finally, let's sign in with the credential
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Navigate to the main layout after successful sign-in
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MainLayout()),
+      );
+    } catch (e) {
+      // Handle any errors that occur during sign-in
+      print('Error signing in with Google: $e');
+      // Optionally show an error message to the user
+    }
   }
 }

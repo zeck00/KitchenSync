@@ -1,10 +1,10 @@
-// ignore_for_file: must_be_immutable, file_names, prefer_const_constructors, unnecessary_this, no_leading_underscores_for_local_identifiers, sized_box_for_whitespace, prefer_final_fields, library_private_types_in_public_api
+// ignore_for_file: must_be_immutable, file_names, prefer_const_constructors, unnecessary_this, no_leading_underscores_for_local_identifiers, sized_box_for_whitespace, prefer_final_fields, library_private_types_in_public_api, non_constant_identifier_names
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class FloatingNavBar extends StatefulWidget {
+class FloatyBar extends StatefulWidget {
   int index;
-  List<CustomFloatingNavBarItem> items;
+  List<CustomFloatyBarItem> items;
   Color color;
 
   double horizontalPadding;
@@ -15,7 +15,7 @@ class FloatingNavBar extends StatefulWidget {
   bool resizeToAvoidBottomInset;
   final Function(int)? onItemSelected;
 
-  FloatingNavBar({
+  FloatyBar({
     super.key,
     this.index = 0,
     this.borderRadius = 15.0,
@@ -31,12 +31,12 @@ class FloatingNavBar extends StatefulWidget {
         assert(items.length <= 5);
 
   @override
-  _FloatingNavBarState createState() {
-    return _FloatingNavBarState();
+  _FloatyBarState createState() {
+    return _FloatyBarState();
   }
 }
 
-class _FloatingNavBarState extends State<FloatingNavBar> {
+class _FloatyBarState extends State<FloatyBar> {
   PageController _pageController = PageController();
 
   @override
@@ -93,11 +93,10 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
     );
   }
 
-  Widget _floatingNavBarItem(
-      CustomFloatingNavBarItem item, int index, bool hapticFeedback) {
+  Widget _FloatyBarItem(
+      CustomFloatyBarItem item, int index, bool hapticFeedback) {
     if (widget.showTitle && item.title.isEmpty) {
-      throw Exception(
-          'Show title set to true: Missing FloatingNavBarItem title!');
+      throw Exception('Show title set to true: Missing FloatyBarItem title!');
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -138,13 +137,13 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
   }
 
   List<Widget> _widgetsBuilder(
-      List<CustomFloatingNavBarItem> items, bool hapticFeedback) {
-    List<Widget> _floatingNavBarItems = [];
+      List<CustomFloatyBarItem> items, bool hapticFeedback) {
+    List<Widget> _FloatyBarItems = [];
     for (int i = 0; i < items.length; i++) {
-      Widget item = this._floatingNavBarItem(items[i], i, hapticFeedback);
-      _floatingNavBarItems.add(item);
+      Widget item = this._FloatyBarItem(items[i], i, hapticFeedback);
+      _FloatyBarItems.add(item);
     }
-    return _floatingNavBarItems;
+    return _FloatyBarItems;
   }
 
   _changePage(int index) {
@@ -155,13 +154,13 @@ class _FloatingNavBarState extends State<FloatingNavBar> {
   }
 }
 
-class CustomFloatingNavBarItem {
+class CustomFloatyBarItem {
   ImageIcon unselectedIcon;
   ImageIcon selectedIcon;
   String title;
   Widget page;
 
-  CustomFloatingNavBarItem({
+  CustomFloatyBarItem({
     required this.unselectedIcon,
     required this.selectedIcon,
     required this.title,

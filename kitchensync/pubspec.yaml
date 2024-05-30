@@ -42,6 +42,7 @@ dependencies:
   location: ^6.0.1
   quickalert: ^1.1.0
   firebase_messaging: ^14.9.1
+  flutter_markdown: ^0.7.1
 
 
 dev_dependencies:

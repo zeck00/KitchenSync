@@ -39,7 +39,7 @@
       {
         "categoryID": "07",
         "categoryName": "Pantry",
-        "iconPath": "assets/images/Steak.png",
+        "iconPath": "assets/images/Pantry.png",
         "itemPath": "items.json"
       }
       

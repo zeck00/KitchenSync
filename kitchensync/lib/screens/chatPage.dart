@@ -1,15 +1,13 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_declarations, avoid_print, library_private_types_in_public_api, file_names, unused_import, prefer_final_fields, unused_field, unused_element
+// ignore_for_file: prefer_const_constructors, unused_field, file_names, library_private_types_in_public_api, prefer_final_fields, unused_element, avoid_print
 
-import 'dart:convert';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:kitchensync/backend/const.dart';
-import 'package:kitchensync/screens/appBar.dart';
 import 'package:kitchensync/styles/AppColors.dart';
-import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:kitchensync/styles/size_config.dart';
+import 'dart:convert';
+import 'dart:async';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -29,22 +27,21 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool _isBotTyping = false;
   bool isTyping = false;
   bool _isTypingInProgress = false;
-  // Add your ChatGPT API URL here
   final String chatGPTAPIUrl = 'https://api.openai.com/v1/chat/completions';
 
   void _simulateTyping(String message) {
     int index = 0;
-    _typingTimer?.cancel(); // Cancel any existing timers
+    _typingTimer?.cancel();
     _typingTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       if (index < message.length) {
         _typingMessage += message[index];
         index++;
         if (index == message.length) {
           _typingTimer?.cancel();
-          _isBotTyping = false; // Turn off typing indicator
-          _typingMessage = message; // Remove cursor at end
+          _isBotTyping = false;
+          _typingMessage = message;
         }
-        setState(() {}); // Trigger a rebuild
+        setState(() {});
       }
     });
   }
@@ -52,10 +49,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // Correct usage of vsync with 'this' which refers to TickerProviderStateMixin
     _typingAnimationController = AnimationController(
       duration: const Duration(milliseconds: 500),
-      vsync: this, // Correct usage of 'this'
+      vsync: this,
     );
     _cursorAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_typingAnimationController)
@@ -81,7 +77,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _sendMessageToChatGPT(String userMessage) async {
-    // Append the user message to the messages array
     final List<Map<String, dynamic>> messages = [
       {
         "role": "system",
@@ -104,7 +99,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${ApiKeys.apiKey}',
+          'Authorization': 'Bearer ${ApiKeys.LapiKey}',
         },
         body: json.encode(body),
       );
@@ -114,7 +109,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         final String botReply =
             responseData['choices'][0]['message']['content'];
 
-        // Before adding the message, simulate typing
         setState(() {
           _isBotTyping = true;
         });
@@ -200,32 +194,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   style: AppFonts.appname,
                   textAlign: TextAlign.center,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: propWidth(25)),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Image.asset(
-                          'assets/images/Prvs.png',
-                          height: propHeight(40),
-                          width: propWidth(40),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(right: propWidth(25)),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: propHeight(40),
-                        width: propWidth(40),
-                      ),
-                    ),
-                  ],
-                ),
               ]),
         ),
       ),
@@ -238,7 +206,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               physics: BouncingScrollPhysics(),
               itemCount: messages.length,
               itemBuilder: (context, index) {
-                // If we reach the end and typing is in progress, show the typing indicator
                 if (index == messages.length && _isTypingInProgress) {
                   return Padding(
                     padding: EdgeInsets.all(8.0),
@@ -246,15 +213,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "$_typingMessage|",
-                        style: TextStyle(
-                            // Define a TextStyle for the typing indicator if necessary
-                            ),
+                        style: TextStyle(),
                       ),
                     ),
                   );
                 }
-
-                // For regular messages, build chat bubbles
                 final message = messages[index];
                 final isUser = message["sender"] == "user";
                 return _buildChatBubble(message["content"], isUser);
@@ -262,8 +225,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 20)
+                .copyWith(bottom: propHeight(20)),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
                   child: TextField(
@@ -280,7 +245,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: CircleAvatar(
+                    radius: propWidth(40),
+                    backgroundColor: _controller.text.trim().isNotEmpty
+                        ? AppColors.primary
+                        : AppColors.greySub,
+                    child: Icon(
+                      size: propHeight(20),
+                      Icons.send_rounded,
+                      color: AppColors.light,
+                    ),
+                  ),
                   onPressed: () {
                     final message = _controller.text.trim();
                     if (message.isNotEmpty) {
@@ -293,7 +268,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-          SizedBox(height: propHeight(15)),
+          SizedBox(height: propHeight(100)),
         ],
       ),
     );
@@ -301,18 +276,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   void _simulateBotTyping(String message) {
     int index = 0;
-    _typingMessage = ""; // Reset the typing message
-    bool showCursor = true; // New variable to toggle cursor visibility
+    _typingMessage = "";
+    bool showCursor = true;
 
     setState(() {
-      _isBotTyping = true; // Start showing the typing indicator
+      _isBotTyping = true;
     });
 
-    _typingTimer?.cancel(); // Cancel any existing timer
-    // Create a new periodic timer for cursor blinking
+    _typingTimer?.cancel();
     Timer? cursorTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {
-        showCursor = !showCursor; // Toggle cursor visibility
+        showCursor = !showCursor;
       });
     });
 
@@ -321,7 +295,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         setState(() {
           _typingMessage =
               message.substring(0, index + 1) + (showCursor ? "|" : "");
-          // Update the last message or add a new one with the cursor
           if (messages.isNotEmpty && messages.last["sender"] == "bot") {
             messages.last["content"] = _typingMessage;
           } else {
@@ -330,18 +303,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         });
         index++;
       } else {
-        // Once the entire message has been "typed out", stop both timers
         timer.cancel();
-        cursorTimer.cancel(); // Stop the cursor blinking timer
+        cursorTimer.cancel();
         setState(() {
-          _typingMessage = message; // Show the final message without cursor
-          _isBotTyping = false; // Hide the typing indicator
+          _typingMessage = message;
+          _isBotTyping = false;
           if (messages.isNotEmpty && messages.last["sender"] == "bot") {
-            messages.last["content"] =
-                _typingMessage; // Update last message without cursor
+            messages.last["content"] = _typingMessage;
           }
         });
-        _scrollToBottom(); // Scroll to the bottom of the chat
+        _scrollToBottom();
       }
     });
   }
@@ -401,8 +372,8 @@ class _TypingIndicatorState extends State<TypingIndicator>
       opacity: _animation.value,
       child: Container(
         width: 2.0,
-        height: 20.0, // Match the height of your TypingIndicator
-        color: AppColors.greySub, // Assuming you have this color defined
+        height: 20.0,
+        color: AppColors.greySub,
       ),
     );
   }

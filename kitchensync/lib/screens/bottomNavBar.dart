@@ -1,14 +1,13 @@
 // ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, prefer_final_fields, file_names
-
-import 'package:floating_navbar/floating_navbar_item.dart';
 import 'package:flutter/material.dart';
+import 'package:kitchensync/screens/chatPage.dart';
 import 'package:kitchensync/screens/donatePage.dart';
 import 'package:kitchensync/screens/homePage.dart';
 import 'package:kitchensync/screens/inventoryPage.dart';
 import 'package:kitchensync/screens/settingsPage.dart';
 import 'package:kitchensync/styles/size_config.dart';
 import 'package:kitchensync/styles/AppColors.dart';
-import 'package:floating_navbar/floating_navbar.dart';
+import 'package:kitchensync/screens/customFloatyBar.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -20,14 +19,19 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-  // Define screens here
   final List<Widget> _screens = [
     HomeScreen(),
     InventoryScreen(),
     DonateScreen(),
     SettingsScreen(),
-    // Add other screens as needed
+    ChatScreen(),
   ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,44 +44,60 @@ class _MainLayoutState extends State<MainLayout> {
       ),
       bottomNavigationBar: Stack(
         children: [
-          FloatingNavBar(
+          FloatyBar(
             resizeToAvoidBottomInset: true,
             showTitle: false,
             color: AppColors.light,
-            //color: Color.fromRGBO(0, 0, 0, 0),
             borderRadius: 90,
             index: _selectedIndex,
-            selectedIconColor: AppColors.primary,
-            unselectedIconColor: AppColors.blue1,
+            horizontalPadding: 15,
+            hapticFeedback: true,
             items: [
-              FloatingNavBarItem(
-                icon: ImageIcon(AssetImage('assets/images/Hut.png')),
-                useImageIcon: true,
+              CustomFloatyBarItem(
+                unselectedIcon: ImageIcon(AssetImage('assets/images/Hut.png'),
+                    color: AppColors.primary),
+                selectedIcon: ImageIcon(AssetImage('assets/images/HutS.png'),
+                    color: AppColors.greySub),
                 title: 'home',
                 page: HomeScreen(),
               ),
-              FloatingNavBarItem(
-                icon: ImageIcon(AssetImage('assets/images/Appliance.png')),
-                useImageIcon: true,
-                title: 'home',
+              CustomFloatyBarItem(
+                unselectedIcon: ImageIcon(
+                    AssetImage('assets/images/Appliance.png'),
+                    color: AppColors.primary),
+                selectedIcon: ImageIcon(
+                    AssetImage('assets/images/ApplianceS.png'),
+                    color: AppColors.greySub),
+                title: 'appliances',
                 page: InventoryScreen(),
               ),
-              FloatingNavBarItem(
-                icon: ImageIcon(AssetImage('assets/images/Hand.png')),
-                useImageIcon: true,
-                title: 'home',
+              CustomFloatyBarItem(
+                unselectedIcon: ImageIcon(AssetImage('assets/images/Bot.png'),
+                    color: AppColors.primary),
+                selectedIcon: ImageIcon(AssetImage('assets/images/BotS.png'),
+                    color: AppColors.greySub),
+                title: 'bot',
+                page: ChatScreen(),
+              ),
+              CustomFloatyBarItem(
+                unselectedIcon: ImageIcon(AssetImage('assets/images/Hand.png'),
+                    color: AppColors.primary),
+                selectedIcon: ImageIcon(AssetImage('assets/images/HandS.png'),
+                    color: AppColors.greySub),
+                title: 'donate',
                 page: DonateScreen(),
               ),
-              FloatingNavBarItem(
-                icon: ImageIcon(AssetImage('assets/images/Setting.png')),
-                useImageIcon: true,
-                title: 'home',
+              CustomFloatyBarItem(
+                unselectedIcon: ImageIcon(
+                    AssetImage('assets/images/Settings.png'),
+                    color: AppColors.primary),
+                selectedIcon: ImageIcon(AssetImage('assets/images/Setting.png'),
+                    color: AppColors.greySub),
+                title: 'settings',
                 page: SettingsScreen(),
               ),
             ],
-            horizontalPadding: 15,
-
-            hapticFeedback: true,
+            onItemSelected: _onItemTapped, // Ensure the index is updated
           ),
         ],
       ),

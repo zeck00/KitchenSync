@@ -66,8 +66,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       backgroundColor: AppColors.primary,
                       child: Image.asset(
                         'assets/images/person.png',
-                        height: propHeight(50),
-                        width: propWidth(50),
+                        height: propHeight(25),
+                        width: propWidth(25),
                       )),
                 ),
               ),
