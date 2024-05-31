@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kitchensync/screens/OCRItemPage.dart';
-import 'package:kitchensync/screens/addItemPage.dart';
 import 'package:kitchensync/screens/chatPage.dart';
 import 'package:kitchensync/screens/customListItem.dart';
 import 'package:kitchensync/screens/editItemPage.dart';
@@ -116,7 +115,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AddItemPage()),
+                        MaterialPageRoute(
+                          builder: (context) => AddOrOCRItemPage(),
+                        ),
                       );
                     },
                     child: Row(
@@ -125,22 +126,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
                           Icons.add_circle_rounded,
                           color: AppColors.dark,
                           size: propWidth(30),
-                        ),
-                        SizedBox(width: propHeight(10)),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => OCRItemPage(),
-                              ),
-                            );
-                          },
-                          child: Icon(
-                            Icons.receipt_long_rounded,
-                            color: AppColors.dark,
-                            size: propWidth(30),
-                          ),
                         ),
                       ],
                     )),

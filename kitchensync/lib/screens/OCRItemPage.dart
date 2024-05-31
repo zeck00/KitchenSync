@@ -1,12 +1,13 @@
-// Import statements remain the same
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, file_names, library_private_types_in_public_api, unused_field, avoid_print, no_leading_underscores_for_local_identifiers
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, file_names, library_private_types_in_public_api, unused_field, avoid_print, no_leading_underscores_for_local_identifiers, unnecessary_null_comparison, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:intl/intl.dart';
+import 'package:kitchensync/backend/const.dart';
 import 'package:kitchensync/backend/dataret.dart';
 import 'package:kitchensync/screens/ErrorPage.dart';
 import 'package:kitchensync/screens/appBar.dart';
@@ -16,15 +17,16 @@ import 'package:kitchensync/styles/AppFonts.dart';
 import 'package:flutter_pro_barcode_scanner/flutter_pro_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:nfc_manager/nfc_manager.dart';
 
-class OCRItemPage extends StatefulWidget {
-  const OCRItemPage({super.key});
+class AddOrOCRItemPage extends StatefulWidget {
+  const AddOrOCRItemPage({super.key});
 
   @override
-  _OCRItemPageState createState() => _OCRItemPageState();
+  _AddOrOCRItemPageState createState() => _AddOrOCRItemPageState();
 }
 
-class _OCRItemPageState extends State<OCRItemPage> {
+class _AddOrOCRItemPageState extends State<AddOrOCRItemPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _pDateController = TextEditingController();
@@ -82,12 +84,8 @@ class _OCRItemPageState extends State<OCRItemPage> {
         itemID: generateItemId(),
         itemName: _itemNameController.text,
         nfcTagID: _nfcTagIdController.text,
-        pDate: selectedPDate != null
-            ? DateFormat('yyyy-MM-dd').format(selectedPDate!)
-            : '',
-        xDate: selectedXDate != null
-            ? DateFormat('yyyy-MM-dd').format(selectedXDate!)
-            : '',
+        pDate: _pDateController.text,
+        xDate: _xDateController.text,
         inDate: DateFormat('yyyy-MM-dd').format(selectedInDate),
         itemInfo: _itemInfoController.text,
         status: selectedStatus ?? '',
@@ -260,8 +258,9 @@ class _OCRItemPageState extends State<OCRItemPage> {
     }
   }
 
+  // Method to pick an image, recognize text, and extract date using GPT-3
   Future<void> pickImageAndRecognizeText(
-      TextEditingController controller) async {
+      TextEditingController controller, bool isDate) async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       final inputImage = InputImage.fromFilePath(image.path);
@@ -269,18 +268,72 @@ class _OCRItemPageState extends State<OCRItemPage> {
           TextRecognizer(script: TextRecognitionScript.latin);
       final RecognizedText recognizedText =
           await textRecognizer.processImage(inputImage);
-      // You can further process the recognizedText to extract date or any other information
-      // For simplicity, let's assume you want to update the controller text with the recognized text
-      setState(() {
-        controller.text = recognizedText.text;
-      });
+
+      print("Recognized text: ${recognizedText.text}"); // Debug output
+
+      if (isDate) {
+        // If the recognized text is supposed to be a date, ask GPT-3 to extract and format it
+        fetchDateFromGPT(recognizedText.text, controller);
+      } else {
+        // Update the controller directly for non-date text
+        setState(() {
+          controller.text = recognizedText.text;
+        });
+      }
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    loadInitialData();
+  // Method to call GPT-3 to extract and format the date from text
+  Future<void> fetchDateFromGPT(
+      String recognizedText, TextEditingController dateController) async {
+    final List<Map<String, dynamic>> messages = [
+      {
+        "role": "system",
+        "content":
+            "Extract the date from the following text and format it as 'yyyy-MM-dd'."
+      },
+      {
+        "role": "user",
+        "content": recognizedText,
+      },
+    ];
+
+    final Map<String, dynamic> body = {
+      "model": "gpt-3.5-turbo",
+      "messages": messages,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://api.openai.com/v1/chat/completions'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${ApiKeys.LapiKey}',
+        },
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final String botReply =
+            responseData['choices'][0]['message']['content'].trim();
+
+        DateTime? parsedDate = DateFormat('yyyy-MM-dd').parseStrict(botReply);
+        if (parsedDate != null) {
+          // Update the date field only if the date was successfully parsed
+          setState(() {
+            dateController.text = DateFormat('yyyy-MM-dd').format(parsedDate);
+          });
+        } else {
+          print("Date could not be parsed");
+        }
+      } else {
+        print('API call failed with status: ${response.statusCode}');
+        print('Error response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error sending message to ChatGPT: $e');
+    }
   }
 
   void loadInitialData() async {
@@ -300,10 +353,18 @@ class _OCRItemPageState extends State<OCRItemPage> {
     setState(() {});
   }
 
-  DateTime? selectedPDate;
-  DateTime? selectedXDate;
+  @override
+  void initState() {
+    super.initState();
+    loadInitialData();
+  }
+
   DateTime selectedInDate = DateTime.now();
   String? selectedStatus;
+  Timer? _timeoutTimer;
+  OverlayEntry? _overlayEntry;
+  String? selectedUnit;
+
   // Method to show the date picker and update the state
   Future<void> _selectDate(BuildContext context, DateTime initialDate,
       ValueChanged<DateTime> onDateSelected) async {
@@ -316,6 +377,184 @@ class _OCRItemPageState extends State<OCRItemPage> {
     if (pickedDate != null && pickedDate != initialDate) {
       onDateSelected(pickedDate);
     }
+  }
+
+  @override
+  void dispose() {
+    _itemNameController.dispose();
+    _pDateController.dispose();
+    _xDateController.dispose();
+    _inDateController.dispose();
+    _itemInfoController.dispose();
+    _quantityController.dispose();
+    _timeoutTimer?.cancel();
+    _overlayEntry?.remove();
+    NfcManager.instance.stopSession();
+    super.dispose();
+  }
+
+  void _showNfcReadOverlay() {
+    _overlayEntry = _createNfcOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  OverlayEntry _createNfcOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 2 - 50,
+        left: MediaQuery.of(context).size.width / 2 - 50,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CircularProgressIndicator(
+                    strokeWidth: 5,
+                    color: AppColors.green,
+                    strokeCap: StrokeCap.round,
+                  ),
+                  SizedBox(height: 16),
+                  Text("Reading NFC...", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void startNFCSession() async {
+    bool isAvailable = await NfcManager.instance.isAvailable();
+    if (!isAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.nearby_error_rounded, color: AppColors.light),
+              Text("NFC is not available on this device"),
+            ],
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    _showNfcReadOverlay();
+    _timeoutTimer = Timer(Duration(seconds: 10), () {
+      _updateOverlayForFailure(); // Update the overlay to show failure
+    }); // Show the overlay
+
+    try {
+      await NfcManager.instance.startSession(
+        onDiscovered: (NfcTag tag) async {
+          _timeoutTimer?.cancel(); // Cancel the timer on successful read
+          final ndef = Ndef.from(tag);
+          if (ndef?.cachedMessage == null) return;
+          for (final record in ndef!.cachedMessage!.records) {
+            String recordData = String.fromCharCodes(record.payload);
+            String jsonPayload = recordData.substring(3);
+            Map<String, dynamic> data = json.decode(jsonPayload);
+            print('NFC Record Data: $recordData');
+
+            setState(() {
+              _itemNameController.text = data['itemName'] ?? '';
+              _nfcTagIdController.text = data['nfcTagId'] ?? '';
+
+              // Use the correct format that matches the NFC record's date format
+              if (data.containsKey('pDate') && data['pDate'].isNotEmpty) {
+                DateTime pDate = DateFormat('yyyy/MM/dd').parse(data['pDate']);
+                _pDateController.text = DateFormat('yyyy-MM-dd').format(pDate);
+              }
+
+              if (data.containsKey('xDate') && data['xDate'].isNotEmpty) {
+                DateTime xDate = DateFormat('yyyy/MM/dd').parse(data['xDate']);
+                _xDateController.text = DateFormat('yyyy-MM-dd').format(xDate);
+              }
+
+              _itemInfoController.text = data['itemInfo'] ?? '';
+              _selectedStatus = data['status'] ?? '';
+              _quantityController.text = data['quantity'].toString();
+              selectedUnit =
+                  _units.contains(data['unit']) ? data['unit'] : null;
+              selectedStatus = [
+                'Fresh',
+                'Old',
+                'Expired',
+                'Better Used Soon',
+                'Damaged'
+              ].firstWhere((status) => status == data['status'],
+                  orElse: () => 'Fresh');
+            });
+          }
+
+          NfcManager.instance.stopSession();
+          _overlayEntry?.remove();
+          _overlayEntry = null;
+        },
+        pollingOptions: {
+          NfcPollingOption.iso14443,
+          NfcPollingOption.iso15693,
+          NfcPollingOption.iso18092
+        },
+      );
+    } catch (e) {
+      _timeoutTimer?.cancel();
+      _updateOverlayForFailure();
+      print('Error: $e');
+    }
+  }
+
+  void _updateOverlayForFailure() {
+    _overlayEntry?.remove(); // Remove any existing overlay
+    _overlayEntry = _createFailureOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+
+    // Set a timer to remove the failure overlay after a duration.
+    Future.delayed(Duration(seconds: 2)).then((_) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
+  }
+
+  OverlayEntry _createFailureOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 2 - 50,
+        left: MediaQuery.of(context).size.width / 2 - 50,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.nearby_error_rounded,
+                      color: Colors.white, size: 50),
+                  SizedBox(height: propHeight(10)),
+                  Text("Couldn't Read", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -345,7 +584,7 @@ class _OCRItemPageState extends State<OCRItemPage> {
                     ),
                     Expanded(child: Container()),
                     Text(
-                      'OCR an Item',
+                      'Add or OCR an Item',
                       style: AppFonts.appname,
                     ),
                     Expanded(child: Container()),
@@ -363,6 +602,15 @@ class _OCRItemPageState extends State<OCRItemPage> {
                         }
                       },
                       child: Text('ADD'),
+                    ),
+                    SizedBox(width: propWidth(10)),
+                    ElevatedButton(
+                      onPressed: startNFCSession,
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(10),
+                      ),
+                      child: Icon(Icons.nfc_rounded),
                     ),
                     SizedBox(width: propWidth(10)),
                   ],
@@ -385,7 +633,7 @@ class _OCRItemPageState extends State<OCRItemPage> {
                       icon:
                           Icon(Icons.camera_alt_rounded, color: AppColors.dark),
                       onPressed: () =>
-                          pickImageAndRecognizeText(_itemNameController),
+                          pickImageAndRecognizeText(_itemNameController, false),
                     ),
                     IconButton(
                       icon: Icon(Icons.barcode_reader, color: AppColors.dark),
@@ -399,36 +647,22 @@ class _OCRItemPageState extends State<OCRItemPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              _selectDate(
-                                  context, selectedPDate ?? DateTime.now(),
-                                  (newDate) {
-                                setState(() {
-                                  selectedPDate = newDate;
-                                  _pDateController.text =
-                                      DateFormat('yyyy-MM-dd').format(newDate);
-                                });
-                              });
-                            },
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: 'Production Date',
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(propHeight(17))),
+                          child: TextFormField(
+                            controller: _pDateController,
+                            decoration: InputDecoration(
+                              labelText: 'Production Date',
+                              fillColor: AppColors.light,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(propHeight(17)),
                               ),
-                              child: Text(selectedPDate == null
-                                  ? 'Select Date'
-                                  : DateFormat('yyyy-MM-dd')
-                                      .format(selectedPDate!)),
                             ),
                           ),
                         ),
                         IconButton(
                           icon: Icon(Icons.camera_alt),
                           onPressed: () =>
-                              pickImageAndRecognizeText(_pDateController),
+                              pickImageAndRecognizeText(_pDateController, true),
                         ),
                       ],
                     ),
@@ -436,36 +670,22 @@ class _OCRItemPageState extends State<OCRItemPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              _selectDate(
-                                  context, selectedXDate ?? DateTime.now(),
-                                  (newDate) {
-                                setState(() {
-                                  selectedXDate = newDate;
-                                  _xDateController.text =
-                                      DateFormat('yyyy-MM-dd').format(newDate);
-                                });
-                              });
-                            },
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: 'Expiry Date',
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(propHeight(17))),
+                          child: TextFormField(
+                            controller: _xDateController,
+                            decoration: InputDecoration(
+                              labelText: 'Expiry Date',
+                              fillColor: AppColors.light,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(propHeight(17)),
                               ),
-                              child: Text(selectedXDate == null
-                                  ? 'Select Date'
-                                  : DateFormat('yyyy-MM-dd')
-                                      .format(selectedXDate!)),
                             ),
                           ),
                         ),
                         IconButton(
                           icon: Icon(Icons.camera_alt),
                           onPressed: () =>
-                              pickImageAndRecognizeText(_xDateController),
+                              pickImageAndRecognizeText(_xDateController, true),
                         ),
                       ],
                     ),
@@ -587,11 +807,28 @@ class _OCRItemPageState extends State<OCRItemPage> {
                 SizedBox(height: propHeight(10)),
                 DropdownButtonFormField<String>(
                   value: selectedKitchen,
-                  onChanged: (newValue) {
-                    setState(() {
+                  onChanged: (newValue) async {
+                    if (newValue != null) {
                       selectedKitchen = newValue;
-                      // This is where you would also update the devices list based on the selected kitchen
-                    });
+                      var kitchen =
+                          kitchens.firstWhere((k) => k.kitchenID == newValue);
+                      devices = await kitchen.loadDevices();
+                      selectedDevice =
+                          devices.isNotEmpty ? devices.first.deviceID : null;
+                      categories = selectedDevice != null
+                          ? await devices.first
+                              .loadCategories(devices.first.categoriesFile)
+                          : [];
+                      selectedCategory = categories.isNotEmpty
+                          ? categories.first.categoryID
+                          : null;
+                    } else {
+                      devices = [];
+                      categories = [];
+                      selectedDevice = null;
+                      selectedCategory = null;
+                    }
+                    setState(() {});
                   },
                   items:
                       kitchens.map<DropdownMenuItem<String>>((Kitchen kitchen) {
@@ -613,11 +850,21 @@ class _OCRItemPageState extends State<OCRItemPage> {
                 SizedBox(height: propHeight(10)),
                 DropdownButtonFormField<String>(
                   value: selectedDevice,
-                  onChanged: (newValue) {
-                    setState(() {
+                  onChanged: (newValue) async {
+                    if (newValue != null) {
                       selectedDevice = newValue;
-                      // This is where you would also update the categories list based on the selected device
-                    });
+                      var device =
+                          devices.firstWhere((d) => d.deviceID == newValue);
+                      categories =
+                          await device.loadCategories(device.categoriesFile);
+                      selectedCategory = categories.isNotEmpty
+                          ? categories.first.categoryID
+                          : null;
+                    } else {
+                      categories = [];
+                      selectedCategory = null;
+                    }
+                    setState(() {});
                   },
                   items: devices.map<DropdownMenuItem<String>>((Device device) {
                     return DropdownMenuItem<String>(
@@ -642,17 +889,6 @@ class _OCRItemPageState extends State<OCRItemPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _itemNameController.dispose();
-    _pDateController.dispose();
-    _xDateController.dispose();
-    _inDateController.dispose();
-    _itemInfoController.dispose();
-    _quantityController.dispose();
-    super.dispose();
   }
 }
 
@@ -720,5 +956,3 @@ void showOverlay(BuildContext context) async {
   await Future.delayed(Duration(seconds: 3));
   overlayEntry.remove();
 }
-
-                    // Call this function where you need to show the overlay.
