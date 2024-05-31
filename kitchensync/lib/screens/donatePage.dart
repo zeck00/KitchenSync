@@ -190,14 +190,14 @@ class DonateScreen extends StatelessWidget {
 Widget _buildDonationSchedule() {
   // Mock data, please replace with actual data
   var donationSchedule = [
-    {'date': '20th Mar, 2024', 'items': '5'},
-    {'date': '24th Mar, 2024', 'items': '7'},
-    {'date': '15th Apr, 2024', 'items': '3'},
-    {'date': '16th May, 2024', 'items': '1'},
-    {'date': '20th Jun, 2024', 'items': '2'},
-    {'date': '30th Aug, 2024', 'items': '4'},
-
-    // Add more schedules as needed
+    {'date': '1st June, 2024', 'items': '5'},
+    {'date': '2nd June, 2024', 'items': '7'},
+    {'date': '15th June, 2024', 'items': '3'},
+    {'date': '18th June, 2024', 'items': '1'},
+    {'date': '30th June, 2024', 'items': '2'},
+    {'date': '7th July, 2024', 'items': '4'},
+    {'date': '10th July, 2024', 'items': '3'},
+    {'date': '14th July, 2024', 'items': '1'},
   ];
 
   return SizedBox(

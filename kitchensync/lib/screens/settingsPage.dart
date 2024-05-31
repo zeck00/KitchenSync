@@ -104,17 +104,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final devices = [
       {
         'name': 'Refrigerator',
-        'count': '41',
+        'count': ' ',
         'imagePath': 'assets/images/Refg.png'
       },
-      {
-        'name': 'Freezer',
-        'count': '37',
-        'imagePath': 'assets/images/Refg1.png'
-      },
+      {'name': 'Freezer', 'count': ' ', 'imagePath': 'assets/images/Refg1.png'},
       {
         'name': 'Refrigerator',
-        'count': '41',
+        'count': ' ',
         'imagePath': 'assets/images/Refg.png'
       },
       // Add more device data here
@@ -137,7 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: EdgeInsets.only(
                       right: propWidth(25)), // space between cards
                   child: CustomDeviceCard(
-                    title: '${device['name']} - ${device['count']}',
+                    title: '${device['name']}${device['count']}',
                     // itemCount: device['count']!,
                     imagePath: device['imagePath']!,
                   ),
