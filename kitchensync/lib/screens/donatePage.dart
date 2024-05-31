@@ -47,26 +47,26 @@ class DonateScreen extends StatelessWidget {
                 Image.asset(
                   'assets/images/kitchenMain1.png',
                 ),
-                Positioned(
-                  bottom: propHeight(80),
-                  right: propWidth(75),
-                  child: GestureDetector(
-                      child: Image.asset(
-                    'assets/images/Items.png',
-                    width: propWidth(110),
-                    height: propHeight(105),
-                  )),
-                ),
-                Positioned(
-                  top: propHeight(40),
-                  left: propWidth(80),
-                  child: GestureDetector(
-                      child: Image.asset(
-                    'assets/images/Items 1.png',
-                    width: propWidth(125),
-                    height: propHeight(90),
-                  )),
-                ),
+                // Positioned(
+                //   bottom: propHeight(80),
+                //   right: propWidth(75),
+                //   child: GestureDetector(
+                //       child: Image.asset(
+                //     'assets/images/Items.png',
+                //     width: propWidth(110),
+                //     height: propHeight(105),
+                //   )),
+                // ),
+                // Positioned(
+                //   top: propHeight(40),
+                //   left: propWidth(80),
+                //   child: GestureDetector(
+                //       child: Image.asset(
+                //     'assets/images/Items 1.png',
+                //     width: propWidth(125),
+                //     height: propHeight(90),
+                //   )),
+                // ),
               ],
             ),
             SizedBox(height: propHeight(20)),

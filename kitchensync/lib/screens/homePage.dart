@@ -135,26 +135,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                Positioned(
-                  top: propHeight(90),
-                  right: propWidth(75),
-                  child: GestureDetector(
-                      child: Image.asset(
-                    'assets/images/Items.png',
-                    width: propWidth(110),
-                    height: propHeight(105),
-                  )),
-                ),
-                Positioned(
-                  top: propHeight(135),
-                  left: propWidth(120),
-                  child: GestureDetector(
-                      child: Image.asset(
-                    'assets/images/Items 1.png',
-                    width: propWidth(125),
-                    height: propHeight(90),
-                  )),
-                ),
+                // Positioned(
+                //   top: propHeight(90),
+                //   right: propWidth(75),
+                //   child: GestureDetector(
+                //       child: Image.asset(
+                //     'assets/images/Items.png',
+                //     width: propWidth(110),
+                //     height: propHeight(105),
+                //   )),
+                // ),
+                // Positioned(
+                //   top: propHeight(135),
+                //   left: propWidth(120),
+                //   child: GestureDetector(
+                //       child: Image.asset(
+                //     'assets/images/Items 1.png',
+                //     width: propWidth(125),
+                //     height: propHeight(90),
+                //   )),
+                // ),
               ],
             ),
             SizedBox(height: propHeight(10)),
